@@ -1,0 +1,2 @@
+[console_scripts]
+py-screen-grab = py_screen_grab.cli:main
