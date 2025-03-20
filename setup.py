@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-
+    
 setup(
     name="py-screen-grab",
     version="1.0.0",
@@ -11,15 +11,15 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "py-screen-grab=py_screen_grab.cli:main",
+            "screengrab=py_screen_grab.cli:main",
         ],
     },
-    author="Your Name",
-    author_email="your.email@example.com",
+    author="twid_yuni",
+    author_email="jyhee7935@naver.com",
     description="A simple screen recording tool",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/py-screen-grab",
+    url="https://github.com/yeonhee7935/py-screen-grab",
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

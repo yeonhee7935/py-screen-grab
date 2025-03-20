@@ -1,4 +1,6 @@
-recording/
+recordings/
+.pytest_cache/
+*.egg-info
 venv/
 __pycache__/
 *.pyc
