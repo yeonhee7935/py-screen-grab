@@ -1,6 +1,7 @@
 README.md
 setup.py
 py_screen_grab/__init__.py
+py_screen_grab/cli.py
 py_screen_grab/screen_grabber.py
 py_screen_grab.egg-info/PKG-INFO
 py_screen_grab.egg-info/SOURCES.txt

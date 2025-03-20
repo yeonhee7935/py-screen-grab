@@ -5,14 +5,7 @@ Summary: A simple screen recording tool
 Home-page: https://github.com/yourusername/py-screen-grab
 Author: Your Name
 Author-email: your.email@example.com
-Classifier: Development Status :: 3 - Alpha
-Classifier: Intended Audience :: End Users/Desktop
-Classifier: Topic :: Multimedia :: Video :: Capture
 Classifier: Programming Language :: Python :: 3
-Classifier: Programming Language :: Python :: 3.6
-Classifier: Programming Language :: Python :: 3.7
-Classifier: Programming Language :: Python :: 3.8
-Classifier: Programming Language :: Python :: 3.9
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
 Requires-Python: >=3.6
