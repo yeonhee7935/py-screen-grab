@@ -1,5 +1,7 @@
 recordings/
 .pytest_cache/
+dist/
+build/
 *.egg-info
 venv/
 __pycache__/

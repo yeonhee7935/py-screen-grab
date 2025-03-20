@@ -1,9 +1,9 @@
 from setuptools import setup, find_packages
-    
+
 setup(
     name="py-screen-grab",
     version="1.0.0",
-    packages=find_packages(),
+    packages=find_packages(exclude=["tests", "tests.*"]),
     install_requires=[
         "mss>=6.1.0",
         "numpy>=1.19.0",
