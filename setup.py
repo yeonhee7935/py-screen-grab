@@ -26,4 +26,9 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.6",
+    test_suite="tests",
+    tests_require=[
+        "pytest>=6.0.0",
+        "pytest-cov>=2.10.0",
+    ],
 ) 

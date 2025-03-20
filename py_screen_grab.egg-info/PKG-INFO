@@ -1,4 +1,4 @@
-Metadata-Version: 2.4
+Metadata-Version: 2.1
 Name: py-screen-grab
 Version: 1.0.0
 Summary: A simple screen recording tool
@@ -10,18 +10,6 @@ Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
 Requires-Python: >=3.6
 Description-Content-Type: text/markdown
-Requires-Dist: mss>=6.1.0
-Requires-Dist: numpy>=1.19.0
-Requires-Dist: opencv-python>=4.5.0
-Dynamic: author
-Dynamic: author-email
-Dynamic: classifier
-Dynamic: description
-Dynamic: description-content-type
-Dynamic: home-page
-Dynamic: requires-dist
-Dynamic: requires-python
-Dynamic: summary
 
 # PyScreenGrab
 
