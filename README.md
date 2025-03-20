@@ -2,6 +2,9 @@
 
 A simple and efficient screen recording tool written in Python.
 
+![PyPI](https://img.shields.io/pypi/v/py-screen-grab)
+![License](https://img.shields.io/pypi/l/py-screen-grab)
+
 ## Features
 
 - Full screen or custom region recording
