@@ -6,11 +6,11 @@ import time
 from datetime import datetime
 
 class ScreenGrabber:
-    def __init__(self):
+    def __init__(self, left=0, top=0, width=640, height=480, fps=30):
         """Initialize screen grabber with default settings."""
         self.sct = mss.mss()
-        self.fps = 30
-        self.roi = {"left": 0, "top": 0, "width": 640, "height": 480}
+        self.fps = fps
+        self.roi = {"left": left, "top": top, "width": width, "height": height}
         
         # Create save directory if it doesn't exist
         self.save_dir = os.path.join(os.getcwd(), "recordings")
