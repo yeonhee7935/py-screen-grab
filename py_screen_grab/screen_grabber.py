@@ -8,8 +8,8 @@ from typing import Optional
 from .window_utils import get_window_roi
 
 # Window decoration constants
-DECORATION_OFFSET_X = 8  # 좌우 보정값
-DECORATION_OFFSET_Y = 37  # 상단 타이틀바 보정값
+DECORATION_OFFSET_X = 12  # 좌우 보정값
+DECORATION_OFFSET_Y = 40  # 상단 타이틀바 보정값
 
 class ScreenGrabber:
     def __init__(self, left=0, top=0, width=640, height=480, fps=30):
@@ -38,8 +38,8 @@ class ScreenGrabber:
         
         if adjust_for_decorations:
             x -= DECORATION_OFFSET_X
-            y -= DECORATION_OFFSET_Y
-            w += DECORATION_OFFSET_X * 2 
+            y -= DECORATION_OFFSET_Y * 2
+            w += DECORATION_OFFSET_X 
             h += DECORATION_OFFSET_Y 
         
         # Adjust coordinates and dimensions to fit within the screen
