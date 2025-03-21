@@ -4,6 +4,12 @@ import numpy as np
 import mss
 import time
 from datetime import datetime
+from typing import Optional
+from .window_utils import get_window_roi
+
+# Window decoration constants
+DECORATION_OFFSET_X = 12  # 좌우 보정값
+DECORATION_OFFSET_Y = 40  # 상단 타이틀바 보정값
 
 class ScreenGrabber:
     def __init__(self, left=0, top=0, width=640, height=480, fps=30):
@@ -16,10 +22,38 @@ class ScreenGrabber:
         self.save_dir = os.path.join(os.getcwd(), "recordings")
         os.makedirs(self.save_dir, exist_ok=True)
 
-    def set_roi(self, x, y, w, h):
-        """Set region of interest for capture."""
+    def set_roi(self, x, y, w, h, adjust_for_decorations=True):
+        """Set region of interest for capture.
+        
+        Args:
+            x (int): X coordinate
+            y (int): Y coordinate
+            w (int): Width
+            h (int): Height
+            adjust_for_decorations (bool): Whether to adjust for window decorations
+        """
+        screen = self.sct.monitors[0]
+        screen_width = screen['width']
+        screen_height = screen['height']
+        
+        if adjust_for_decorations:
+            x -= DECORATION_OFFSET_X
+            y -= DECORATION_OFFSET_Y * 2
+            w += DECORATION_OFFSET_X 
+            h += DECORATION_OFFSET_Y 
+        
+        # Adjust coordinates and dimensions to fit within the screen
+        if x < 0:
+            x = 0
+        if y < 0:
+            y = 0
+        if x + w > screen_width:
+            w = screen_width - x
+        if y + h > screen_height:
+            h = screen_height - y
         if w <= 0 or h <= 0:
             raise ValueError("Width and height must be positive numbers")
+        
         self.roi = {"left": x, "top": y, "width": w, "height": h}
 
     def set_fps(self, fps):
@@ -40,7 +74,7 @@ class ScreenGrabber:
         window_name = 'Preview (Press q to quit)'
         cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
         
-        # 프레임 크기가 너무 크면 축소
+        # if frame size is too large, resize it
         h, w = frame.shape[:2]
         max_height = 480
         if h > max_height:
@@ -49,18 +83,18 @@ class ScreenGrabber:
             new_h = max_height
             cv2.resizeWindow(window_name, new_w, new_h)
         
-        # 창을 오른쪽 하단으로 이동
-        screen = self.sct.monitors[0]  # 주 모니터 정보
+        # move window to right bottom
+        screen = self.sct.monitors[0]   
         screen_w, screen_h = screen["width"], screen["height"]
         window_w = min(w, int(screen_w * 0.3))  # 화면 너비의 30%
         window_h = min(h, int(screen_h * 0.3))  # 화면 높이의 30%
         
-        # 창 크기 조정
+        # resize window
         cv2.resizeWindow(window_name, window_w, window_h)
         
-        # 창 위치 설정 (오른쪽 하단)
-        x = screen_w - window_w - 50  # 오른쪽에서 50픽셀 여백
-        y = screen_h - window_h - 50  # 아래에서 50픽셀 여백
+        # set window position to right bottom
+        x = screen_w - window_w - 50  # 50 pixel gap from right
+        y = screen_h - window_h - 50  # 50 pixel gap from bottom
         cv2.moveWindow(window_name, x, y)
         
         return window_name
@@ -84,11 +118,12 @@ class ScreenGrabber:
         finally:
             cv2.destroyAllWindows()
 
-    def start_recording(self, duration=None):
+    def start_recording(self, duration=None, show_preview=True):
         """Start recording the screen.
         
         Args:
             duration (float, optional): Recording duration in seconds. If None, records until interrupted.
+            show_preview (bool): Whether to show preview window while recording. Defaults to True.
         """
         filename = os.path.join(
             self.save_dir,
@@ -109,15 +144,20 @@ class ScreenGrabber:
                 frame_start = time.time()
                 frame = self.capture_screen()
                 
-                if first_frame:
-                    window_name = self._setup_preview_window(frame)
-                    first_frame = False
+                if show_preview:
+                    if first_frame:
+                        window_name = self._setup_preview_window(frame)
+                        first_frame = False
+                    cv2.imshow(window_name, frame)
+                    
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                        break
+                else: 
+                    if time.time() - start_time > 0.1:  
+                        if cv2.waitKey(1) & 0xFF == ord('q'):
+                            break
                 
-                cv2.imshow(window_name, frame)
                 out.write(frame)
-                
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
                 
                 if duration and (time.time() - start_time) >= duration:
                     break
@@ -133,3 +173,25 @@ class ScreenGrabber:
             out.release()
             cv2.destroyAllWindows()
             print(f"\nRecording saved to: {filename}") 
+
+    def set_window(self, window_name: str) -> None:
+        """Set ROI based on window name using wmctrl.
+        
+        Args:
+            window_name (str): Name of the window to capture
+            
+        Raises:
+            Exception: If window is not found or setting ROI fails
+        """
+        try:
+            window_info = get_window_roi(window_name)
+            self.set_roi(
+                x=window_info["x"],
+                y=window_info["y"],
+                w=window_info["width"],
+                h=window_info["height"],
+                adjust_for_decorations=True
+            )
+            print(f"Window '{window_info['name']}' selected for capture")
+        except Exception as e:
+            raise Exception(f"Failed to set window: {str(e)}") 

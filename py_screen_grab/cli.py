@@ -95,6 +95,18 @@ def get_duration():
         except ValueError:
             print("❌ Please enter a valid number.")
 
+def get_show_preview():
+    """Select whether to show preview during recording."""
+    print("\n[Show Preview]")
+    print("1. Yes")
+    print("2. No")
+    
+    while True:
+        choice = input("\nChoice (1 or 2): ")
+        if choice in ['1', '2']:
+            return choice == '1'  # Return True for 'Yes', False for 'No'
+        print("❌ Invalid choice. Please enter 1 or 2.")
+
 def main():
     """Main CLI entry point."""
     try:
@@ -121,7 +133,11 @@ def main():
             grabber.preview_only()
         else:
             duration = get_duration()
-            grabber.start_recording(duration)
+            show_preview = get_show_preview()
+            print("\nRecording started!")
+            if not show_preview:
+                print("Press Ctrl+C to stop recording")
+            grabber.start_recording(duration, show_preview)
             
     except KeyboardInterrupt:
         print("\n\nProgram interrupted by user.")
