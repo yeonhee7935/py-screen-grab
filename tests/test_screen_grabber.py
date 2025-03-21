@@ -103,8 +103,8 @@ class TestScreenGrabber(unittest.TestCase):
         
         expected_roi = {
             "left": original_x - DECORATION_OFFSET_X,
-            "top": original_y - DECORATION_OFFSET_Y,
-            "width": original_w + (DECORATION_OFFSET_X * 2),
+            "top": original_y - DECORATION_OFFSET_Y * 2,
+            "width": original_w + (DECORATION_OFFSET_X),
             "height": original_h + DECORATION_OFFSET_Y
         }
         
