@@ -59,5 +59,38 @@ class TestScreenGrabber(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.grabber.set_roi(0, 0, 640, -1)
 
+    def test_set_roi_with_negative_coordinates(self):
+        """Test setting ROI with negative coordinates."""
+        self.grabber.set_roi(-100, -100, 640, 480)
+        self.assertEqual(self.grabber.roi, {"left": 0, "top": 0, "width": 640, "height": 480})
+
+    def test_set_roi_with_exceeding_width(self):
+        """Test setting ROI with width exceeding screen width."""
+        screen_width = self.grabber.sct.monitors[0]['width']
+        self.grabber.set_roi(100, 100, screen_width + 100, 480)  # Width exceeds screen width
+        expected_width = screen_width - 100  # Adjusted width
+        self.assertEqual(self.grabber.roi, {"left": 100, "top": 100, "width": expected_width, "height": 480})
+
+    def test_set_roi_with_exceeding_height(self):
+        """Test setting ROI with height exceeding screen height."""
+        screen_height = self.grabber.sct.monitors[0]['height']
+        self.grabber.set_roi(100, 100, 640, screen_height + 100)  # Height exceeds screen height
+        expected_height = screen_height - 100  # Adjusted height
+        self.assertEqual(self.grabber.roi, {"left": 100, "top": 100, "width": 640, "height": expected_height})
+
+    def test_set_roi_with_exceeding_both(self):
+        """Test setting ROI with both width and height exceeding screen dimensions."""
+        screen_width = self.grabber.sct.monitors[0]['width']
+        screen_height = self.grabber.sct.monitors[0]['height']
+        self.grabber.set_roi(100, 100, screen_width + 100, screen_height + 100)  # Both dimensions exceed
+        expected_width = screen_width - 100  # Adjusted width
+        expected_height = screen_height - 100  # Adjusted height
+        self.assertEqual(self.grabber.roi, {"left": 100, "top": 100, "width": expected_width, "height": expected_height})
+
+    def test_set_roi_with_valid_coordinates(self):
+        """Test setting ROI with valid coordinates."""
+        self.grabber.set_roi(100, 100, 300, 200)
+        self.assertEqual(self.grabber.roi, {"left": 100, "top": 100, "width": 300, "height": 200})
+
 if __name__ == '__main__':
     unittest.main() 

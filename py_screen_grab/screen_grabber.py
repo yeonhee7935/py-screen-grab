@@ -18,8 +18,22 @@ class ScreenGrabber:
 
     def set_roi(self, x, y, w, h):
         """Set region of interest for capture."""
+        screen = self.sct.monitors[0]  # Get primary monitor information
+        screen_width = screen['width']
+        screen_height = screen['height']
+        
+        # Adjust coordinates and dimensions to fit within the screen
+        if x < 0:
+            x = 0
+        if y < 0:
+            y = 0
+        if x + w > screen_width:
+            w = screen_width - x
+        if y + h > screen_height:
+            h = screen_height - y
         if w <= 0 or h <= 0:
             raise ValueError("Width and height must be positive numbers")
+        
         self.roi = {"left": x, "top": y, "width": w, "height": h}
 
     def set_fps(self, fps):
