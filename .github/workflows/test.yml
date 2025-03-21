@@ -3,7 +3,7 @@ name: Test
 on:
   pull_request:
     branches:
-      - master # master에 머지되기 전 PR에서 실행
+      - master
 
 jobs:
   test:
@@ -18,14 +18,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             xvfb \
-            x11-utils \
-            libxcb-randr0-dev \
-            libxcb-xtest0-dev \
-            libxcb-xinerama0-dev \
-            libxcb-shape0-dev \
-            libxcb-xkb-dev \
+            wmctrl \
             python3-xlib \
-            python3-tk \
             scrot
 
       - name: Set up Python
@@ -39,5 +33,14 @@ jobs:
           pip install -r requirements.txt
           pip install pytest
 
+      - name: Start Xvfb
+        run: |
+          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          echo "DISPLAY=:99" >> $GITHUB_ENV
+
       - name: Run tests
-        run: pytest # pytest로 테스트 실행
+        env:
+          DISPLAY: ":99"
+        run: |
+          sleep 3  # X 서버가 완전히 시작될 때까지 대기
+          pytest
