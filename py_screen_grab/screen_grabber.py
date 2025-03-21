@@ -84,11 +84,12 @@ class ScreenGrabber:
         finally:
             cv2.destroyAllWindows()
 
-    def start_recording(self, duration=None):
+    def start_recording(self, duration=None, show_preview=True):
         """Start recording the screen.
         
         Args:
             duration (float, optional): Recording duration in seconds. If None, records until interrupted.
+            show_preview (bool): Whether to show preview window while recording. Defaults to True.
         """
         filename = os.path.join(
             self.save_dir,
@@ -109,15 +110,20 @@ class ScreenGrabber:
                 frame_start = time.time()
                 frame = self.capture_screen()
                 
-                if first_frame:
-                    window_name = self._setup_preview_window(frame)
-                    first_frame = False
+                if show_preview:
+                    if first_frame:
+                        window_name = self._setup_preview_window(frame)
+                        first_frame = False
+                    cv2.imshow(window_name, frame)
+                    
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                        break
+                else: 
+                    if time.time() - start_time > 0.1:  
+                        if cv2.waitKey(1) & 0xFF == ord('q'):
+                            break
                 
-                cv2.imshow(window_name, frame)
                 out.write(frame)
-                
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
                 
                 if duration and (time.time() - start_time) >= duration:
                     break
