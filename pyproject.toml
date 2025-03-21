@@ -1,6 +1,6 @@
 [tool.semantic_release]
 version_source = "commit"
-version_variable = "setup.py:version"
+version_variable = "setup.py:__version__"
 branch = "master"
 changelog_file = "CHANGELOG.md"
 
@@ -12,4 +12,5 @@ match = "master"
 prerelease = false
 
 [tool.semantic_release.publish]
-upload_to_pypi = true
+upload_to_repository = true
+build_command = "python -m build"
