@@ -1,0 +1,15 @@
+[tool.semantic_release]
+version_source = "commit"
+version_variable = "setup.py:version"
+branch = "master"
+changelog_file = "CHANGELOG.md"
+
+[tool.semantic_release.release_groups]
+develop = ["master"]
+
+[tool.semantic_release.branches.master]
+match = "master"
+prerelease = false
+
+[tool.semantic_release.publish]
+upload_to_pypi = true
