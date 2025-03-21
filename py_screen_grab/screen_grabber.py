@@ -16,11 +16,29 @@ class ScreenGrabber:
         self.save_dir = os.path.join(os.getcwd(), "recordings")
         os.makedirs(self.save_dir, exist_ok=True)
 
-    def set_roi(self, x, y, w, h):
-        """Set region of interest for capture."""
-        screen = self.sct.monitors[0]  # Get primary monitor information
+    def set_roi(self, x, y, w, h, adjust_for_decorations=True):
+        """Set region of interest for capture.
+        
+        Args:
+            x (int): X coordinate
+            y (int): Y coordinate
+            w (int): Width
+            h (int): Height
+            adjust_for_decorations (bool): Whether to adjust for window decorations
+        """
+        screen = self.sct.monitors[0]
         screen_width = screen['width']
         screen_height = screen['height']
+        
+        if adjust_for_decorations:
+            # Add compensation values for window decorations
+            # These values might need adjustment based on your window manager
+            decoration_offset_x = 8  # 좌우 보정값
+            decoration_offset_y = 37  
+            x -= decoration_offset_x
+            y -= decoration_offset_y
+            w += decoration_offset_x * 2 
+            h += decoration_offset_y 
         
         # Adjust coordinates and dimensions to fit within the screen
         if x < 0:
@@ -54,7 +72,7 @@ class ScreenGrabber:
         window_name = 'Preview (Press q to quit)'
         cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
         
-        # 프레임 크기가 너무 크면 축소
+        # if frame size is too large, resize it
         h, w = frame.shape[:2]
         max_height = 480
         if h > max_height:
@@ -63,18 +81,18 @@ class ScreenGrabber:
             new_h = max_height
             cv2.resizeWindow(window_name, new_w, new_h)
         
-        # 창을 오른쪽 하단으로 이동
-        screen = self.sct.monitors[0]  # 주 모니터 정보
+        # move window to right bottom
+        screen = self.sct.monitors[0]   
         screen_w, screen_h = screen["width"], screen["height"]
         window_w = min(w, int(screen_w * 0.3))  # 화면 너비의 30%
         window_h = min(h, int(screen_h * 0.3))  # 화면 높이의 30%
         
-        # 창 크기 조정
+        # resize window
         cv2.resizeWindow(window_name, window_w, window_h)
         
-        # 창 위치 설정 (오른쪽 하단)
-        x = screen_w - window_w - 50  # 오른쪽에서 50픽셀 여백
-        y = screen_h - window_h - 50  # 아래에서 50픽셀 여백
+        # set window position to right bottom
+        x = screen_w - window_w - 50  # 50 pixel gap from right
+        y = screen_h - window_h - 50  # 50 pixel gap from bottom
         cv2.moveWindow(window_name, x, y)
         
         return window_name
