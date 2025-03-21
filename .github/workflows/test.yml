@@ -13,6 +13,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            xvfb \
+            x11-utils \
+            libxcb-randr0-dev \
+            libxcb-xtest0-dev \
+            libxcb-xinerama0-dev \
+            libxcb-shape0-dev \
+            libxcb-xkb-dev \
+            python3-xlib \
+            python3-tk \
+            scrot
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
