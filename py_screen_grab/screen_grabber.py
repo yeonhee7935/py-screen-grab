@@ -4,6 +4,12 @@ import numpy as np
 import mss
 import time
 from datetime import datetime
+from typing import Optional
+from .window_utils import get_window_roi
+
+# Window decoration constants
+DECORATION_OFFSET_X = 8  # 좌우 보정값
+DECORATION_OFFSET_Y = 37  # 상단 타이틀바 보정값
 
 class ScreenGrabber:
     def __init__(self, left=0, top=0, width=640, height=480, fps=30):
@@ -31,14 +37,10 @@ class ScreenGrabber:
         screen_height = screen['height']
         
         if adjust_for_decorations:
-            # Add compensation values for window decorations
-            # These values might need adjustment based on your window manager
-            decoration_offset_x = 8  # 좌우 보정값
-            decoration_offset_y = 37  
-            x -= decoration_offset_x
-            y -= decoration_offset_y
-            w += decoration_offset_x * 2 
-            h += decoration_offset_y 
+            x -= DECORATION_OFFSET_X
+            y -= DECORATION_OFFSET_Y
+            w += DECORATION_OFFSET_X * 2 
+            h += DECORATION_OFFSET_Y 
         
         # Adjust coordinates and dimensions to fit within the screen
         if x < 0:
@@ -171,3 +173,25 @@ class ScreenGrabber:
             out.release()
             cv2.destroyAllWindows()
             print(f"\nRecording saved to: {filename}") 
+
+    def set_window(self, window_name: str) -> None:
+        """Set ROI based on window name using wmctrl.
+        
+        Args:
+            window_name (str): Name of the window to capture
+            
+        Raises:
+            Exception: If window is not found or setting ROI fails
+        """
+        try:
+            window_info = get_window_roi(window_name)
+            self.set_roi(
+                x=window_info["x"],
+                y=window_info["y"],
+                w=window_info["width"],
+                h=window_info["height"],
+                adjust_for_decorations=True
+            )
+            print(f"Window '{window_info['name']}' selected for capture")
+        except Exception as e:
+            raise Exception(f"Failed to set window: {str(e)}") 

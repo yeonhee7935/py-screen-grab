@@ -1,7 +1,7 @@
 import unittest
 import os
 import numpy as np
-from py_screen_grab.screen_grabber import ScreenGrabber
+from py_screen_grab.screen_grabber import ScreenGrabber, DECORATION_OFFSET_X, DECORATION_OFFSET_Y
 
 class TestScreenGrabber(unittest.TestCase):
     def setUp(self):
@@ -20,12 +20,6 @@ class TestScreenGrabber(unittest.TestCase):
         self.assertTrue(os.path.exists(self.grabber.save_dir))
         self.assertEqual(self.grabber.fps, 30)  # default fps
 
-    def test_set_roi(self):
-        """Test setting region of interest."""
-        x, y, w, h = self.test_roi
-        self.grabber.set_roi(x, y, w, h)
-        self.assertEqual(self.grabber.roi, {"left": x, "top": y, "width": w, "height": h})
-
     def test_set_fps(self):
         """Test setting FPS."""
         self.grabber.set_fps(self.test_fps)
@@ -43,7 +37,7 @@ class TestScreenGrabber(unittest.TestCase):
     def test_capture_screen(self):
         """Test screen capture functionality."""
         x, y, w, h = self.test_roi
-        self.grabber.set_roi(x, y, w, h)
+        self.grabber.set_roi(x, y, w, h, adjust_for_decorations=False)
         frame = self.grabber.capture_screen()
         
         # Check frame properties
@@ -55,42 +49,126 @@ class TestScreenGrabber(unittest.TestCase):
     def test_set_invalid_roi(self):
         """Test setting invalid ROI values."""
         with self.assertRaises(ValueError):
-            self.grabber.set_roi(0, 0, -1, 480)
+            self.grabber.set_roi(0, 0, -1, 480, adjust_for_decorations=False)
         with self.assertRaises(ValueError):
-            self.grabber.set_roi(0, 0, 640, -1)
+            self.grabber.set_roi(0, 0, 640, -1, adjust_for_decorations=False)
 
-    def test_set_roi_with_negative_coordinates(self):
-        """Test setting ROI with negative coordinates."""
-        self.grabber.set_roi(-100, -100, 640, 480)
-        self.assertEqual(self.grabber.roi, {"left": 0, "top": 0, "width": 640, "height": 480})
+    def test_basic_roi_adjustments(self):
+        """Test basic ROI adjustments without decoration compensation."""
+        screen = self.grabber.sct.monitors[0]
+        screen_width = screen['width']
+        screen_height = screen['height']
 
-    def test_set_roi_with_exceeding_width(self):
-        """Test setting ROI with width exceeding screen width."""
-        screen_width = self.grabber.sct.monitors[0]['width']
-        self.grabber.set_roi(100, 100, screen_width + 100, 480)  # Width exceeds screen width
-        expected_width = screen_width - 100  # Adjusted width
-        self.assertEqual(self.grabber.roi, {"left": 100, "top": 100, "width": expected_width, "height": 480})
+        test_cases = [
+            {
+                "name": "negative coordinates",
+                "input": (-100, -100, 640, 480),
+                "expected": {"left": 0, "top": 0, "width": 640, "height": 480}
+            },
+            {
+                "name": "exceeding width",
+                "input": (100, 100, screen_width + 100, 480),
+                "expected": {"left": 100, "top": 100, "width": screen_width - 100, "height": 480}
+            },
+            {
+                "name": "exceeding height",
+                "input": (100, 100, 640, screen_height + 100),
+                "expected": {"left": 100, "top": 100, "width": 640, "height": screen_height - 100}
+            },
+            {
+                "name": "valid coordinates",
+                "input": (100, 100, 300, 200),
+                "expected": {"left": 100, "top": 100, "width": 300, "height": 200}
+            }
+        ]
 
-    def test_set_roi_with_exceeding_height(self):
-        """Test setting ROI with height exceeding screen height."""
-        screen_height = self.grabber.sct.monitors[0]['height']
-        self.grabber.set_roi(100, 100, 640, screen_height + 100)  # Height exceeds screen height
-        expected_height = screen_height - 100  # Adjusted height
-        self.assertEqual(self.grabber.roi, {"left": 100, "top": 100, "width": 640, "height": expected_height})
+        for case in test_cases:
+            with self.subTest(case=case["name"]):
+                x, y, w, h = case["input"]
+                self.grabber.set_roi(x, y, w, h, adjust_for_decorations=False)
+                self.assertEqual(self.grabber.roi, case["expected"])
 
-    def test_set_roi_with_exceeding_both(self):
-        """Test setting ROI with both width and height exceeding screen dimensions."""
-        screen_width = self.grabber.sct.monitors[0]['width']
-        screen_height = self.grabber.sct.monitors[0]['height']
-        self.grabber.set_roi(100, 100, screen_width + 100, screen_height + 100)  # Both dimensions exceed
-        expected_width = screen_width - 100  # Adjusted width
-        expected_height = screen_height - 100  # Adjusted height
-        self.assertEqual(self.grabber.roi, {"left": 100, "top": 100, "width": expected_width, "height": expected_height})
+    def test_roi_with_decoration_adjustment(self):
+        """Test ROI adjustments with window decoration compensation."""
+        original_x, original_y = 100, 100
+        original_w, original_h = 300, 200
+        
+        self.grabber.set_roi(
+            original_x, 
+            original_y, 
+            original_w, 
+            original_h, 
+            adjust_for_decorations=True
+        )
+        
+        expected_roi = {
+            "left": original_x - DECORATION_OFFSET_X,
+            "top": original_y - DECORATION_OFFSET_Y,
+            "width": original_w + (DECORATION_OFFSET_X * 2),
+            "height": original_h + DECORATION_OFFSET_Y
+        }
+        
+        self.assertEqual(self.grabber.roi, expected_roi)
 
-    def test_set_roi_with_valid_coordinates(self):
-        """Test setting ROI with valid coordinates."""
-        self.grabber.set_roi(100, 100, 300, 200)
-        self.assertEqual(self.grabber.roi, {"left": 100, "top": 100, "width": 300, "height": 200})
+    def test_roi_without_decoration_adjustment(self):
+        """Test ROI adjustments without window decoration compensation."""
+        original_x, original_y = 100, 100
+        original_w, original_h = 300, 200
+        
+        self.grabber.set_roi(
+            original_x, 
+            original_y, 
+            original_w, 
+            original_h, 
+            adjust_for_decorations=False
+        )
+        
+        expected_roi = {
+            "left": original_x,
+            "top": original_y,
+            "width": original_w,
+            "height": original_h
+        }
+        
+        self.assertEqual(self.grabber.roi, expected_roi)
+
+    def test_decoration_adjustment_with_screen_bounds(self):
+        """Test window decoration compensation with screen boundary checks."""
+        screen = self.grabber.sct.monitors[0]
+        screen_width = screen['width']
+        screen_height = screen['height']
+
+        # Test case near screen edges
+        self.grabber.set_roi(
+            10,  # Very close to left edge
+            10,  # Very close to top edge
+            300,
+            200,
+            adjust_for_decorations=True
+        )
+
+        # Should not go below 0 for x and y
+        self.assertGreaterEqual(self.grabber.roi["left"], 0)
+        self.assertGreaterEqual(self.grabber.roi["top"], 0)
+
+        # Test case near screen edges (right and bottom)
+        self.grabber.set_roi(
+            screen_width - 100,  # Close to right edge
+            screen_height - 100,  # Close to bottom edge
+            300,
+            200,
+            adjust_for_decorations=True
+        )
+
+        # Should not exceed screen dimensions
+        self.assertLessEqual(
+            self.grabber.roi["left"] + self.grabber.roi["width"],
+            screen_width
+        )
+        self.assertLessEqual(
+            self.grabber.roi["top"] + self.grabber.roi["height"],
+            screen_height
+        )
 
 if __name__ == '__main__':
     unittest.main() 
