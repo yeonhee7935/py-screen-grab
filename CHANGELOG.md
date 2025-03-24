@@ -1,9 +1,12 @@
 # CHANGELOG
 
 
-## v1.1.0 (2025-03-21)
+## v1.1.0 (2025-03-24)
 
 ### Features
+
+- Add download badge
+  ([`f0c14d1`](https://github.com/yeonhee7935/py-screen-grab/commit/f0c14d11362ab5a09c72ab48b4fedfa247abb59d))
 
 - Add github workflows
   ([`8c7f0cb`](https://github.com/yeonhee7935/py-screen-grab/commit/8c7f0cb5f8f10d8c489a9796d43977393541a2b9))
