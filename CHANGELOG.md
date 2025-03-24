@@ -30,6 +30,9 @@ allowing users to choose whether to display a preview while recording
 
 ### Refactoring
 
+- Add build_command
+  ([`b7b12af`](https://github.com/yeonhee7935/py-screen-grab/commit/b7b12af42c1e5aa8758026f5e4d639dc9a600bca))
+
 - Add compensation values for window decorations
   ([`2e4484c`](https://github.com/yeonhee7935/py-screen-grab/commit/2e4484c8d85844dcb1cbba83de3e4108b2eb16e1))
 
