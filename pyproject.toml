@@ -13,3 +13,4 @@ prerelease = false
 
 [tool.semantic_release.publish]
 upload_to_pypi = true
+build_command = "python -m build"
