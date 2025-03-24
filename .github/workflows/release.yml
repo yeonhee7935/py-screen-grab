@@ -89,6 +89,10 @@ jobs:
           github_token: ${{ secrets.ENV_GITHUB_TOKEN }}
           git_committer_name: "github-actions"
           git_committer_email: "actions@users.noreply.github.com"
+      - name: Debug | Check dist directory
+        run: |
+          ls -al /github/workspace
+          ls -al /github/workspace/dist || echo "dist directory does not exist!"
 
       - name: Publish | Upload package to PyPI
         uses: pypa/gh-action-pypi-publish@v1.12.4
