@@ -1,8 +1,11 @@
 from setuptools import setup, find_packages
 
+
+__version__ = "1.0.0"
+    
 setup(
     name="py-screen-grab",
-    version="1.0.0",
+    version=__version__,
     packages=find_packages(exclude=["tests", "tests.*"]),
     install_requires=[
         "mss>=6.1.0",
@@ -23,7 +26,7 @@ setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
+        'Operating System :: POSIX :: Linux', 
     ],
     python_requires=">=3.6",
     test_suite="tests",
