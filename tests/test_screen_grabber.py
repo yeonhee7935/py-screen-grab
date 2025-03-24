@@ -22,10 +22,11 @@ class TestScreenGrabber(unittest.TestCase):
 
     def test_set_fps(self):
         """Test setting FPS."""
-        self.grabber.set_fps(self.test_fps)
+        result = self.grabber.set_fps(self.test_fps)
         self.assertEqual(self.grabber.fps, self.test_fps)
+        self.assertEqual(result, self.grabber)  # Test method chaining
 
-    def test_set_invalid_fps(self):
+    def test_invalid_fps(self):
         """Test setting invalid FPS values."""
         with self.assertRaises(ValueError):
             self.grabber.set_fps(0)
@@ -34,11 +35,11 @@ class TestScreenGrabber(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.grabber.set_fps(61)
 
-    def test_capture_screen(self):
+    def test_capture_frame(self):
         """Test screen capture functionality."""
         x, y, w, h = self.test_roi
         self.grabber.set_roi(x, y, w, h, adjust_for_decorations=False)
-        frame = self.grabber.capture_screen()
+        frame = self.grabber._capture_frame()  # Access internal method
         
         # Check frame properties
         self.assertIsInstance(frame, np.ndarray)
@@ -46,7 +47,7 @@ class TestScreenGrabber(unittest.TestCase):
         self.assertEqual(frame.shape[1], w)  # width
         self.assertEqual(frame.shape[2], 3)  # RGB channels
 
-    def test_set_invalid_roi(self):
+    def test_invalid_roi(self):
         """Test setting invalid ROI values."""
         with self.assertRaises(ValueError):
             self.grabber.set_roi(0, 0, -1, 480, adjust_for_decorations=False)
@@ -85,15 +86,16 @@ class TestScreenGrabber(unittest.TestCase):
         for case in test_cases:
             with self.subTest(case=case["name"]):
                 x, y, w, h = case["input"]
-                self.grabber.set_roi(x, y, w, h, adjust_for_decorations=False)
+                result = self.grabber.set_roi(x, y, w, h, adjust_for_decorations=False)
                 self.assertEqual(self.grabber.roi, case["expected"])
+                self.assertEqual(result, self.grabber)  # Test method chaining
 
     def test_roi_with_decoration_adjustment(self):
         """Test ROI adjustments with window decoration compensation."""
         original_x, original_y = 100, 100
         original_w, original_h = 300, 200
         
-        self.grabber.set_roi(
+        result = self.grabber.set_roi(
             original_x, 
             original_y, 
             original_w, 
@@ -109,13 +111,14 @@ class TestScreenGrabber(unittest.TestCase):
         }
         
         self.assertEqual(self.grabber.roi, expected_roi)
+        self.assertEqual(result, self.grabber)  # Test method chaining
 
     def test_roi_without_decoration_adjustment(self):
         """Test ROI adjustments without window decoration compensation."""
         original_x, original_y = 100, 100
         original_w, original_h = 300, 200
         
-        self.grabber.set_roi(
+        result = self.grabber.set_roi(
             original_x, 
             original_y, 
             original_w, 
@@ -131,6 +134,7 @@ class TestScreenGrabber(unittest.TestCase):
         }
         
         self.assertEqual(self.grabber.roi, expected_roi)
+        self.assertEqual(result, self.grabber)  # Test method chaining
 
     def test_decoration_adjustment_with_screen_bounds(self):
         """Test window decoration compensation with screen boundary checks."""
