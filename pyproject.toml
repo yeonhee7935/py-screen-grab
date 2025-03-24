@@ -12,5 +12,5 @@ match = "master"
 prerelease = false
 
 [tool.semantic_release.publish]
-upload_to_pypi = true
+upload_to_repository = true
 build_command = "python -m build"
