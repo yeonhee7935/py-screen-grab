@@ -4,7 +4,7 @@ import numpy as np
 import mss
 import time
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict, Any, Generator, Union, Tuple, List
 from .window_utils import get_window_roi
 
 # Window decoration constants
@@ -12,8 +12,12 @@ DECORATION_OFFSET_X = 12  # Horizontal offset for window decorations
 DECORATION_OFFSET_Y = 40  # Vertical offset for title bar
 
 class ScreenGrabber:
-    def __init__(self, left=0, top=0, width=640, height=480, fps=30):
-        """Initialize screen grabber with default settings."""
+    def __init__(self, left=0, top=0, width=640, height=480, fps=30) -> None:
+        """Initialize screen grabber with default settings.
+        
+        Returns:
+            None
+        """
         self.sct = mss.mss()
         self.fps = fps
         self.roi = {"left": left, "top": top, "width": width, "height": height}
@@ -22,7 +26,7 @@ class ScreenGrabber:
         self.save_dir = os.path.join(os.getcwd(), "recordings")
         os.makedirs(self.save_dir, exist_ok=True)
 
-    def set_roi(self, x, y, w, h, adjust_for_decorations=True):
+    def set_roi(self, x, y, w, h, adjust_for_decorations=True) -> 'ScreenGrabber':
         """Set region of interest for capture.
         
         Args:
@@ -34,6 +38,9 @@ class ScreenGrabber:
             
         Returns:
             ScreenGrabber: self for method chaining
+            
+        Raises:
+            ValueError: If width or height is not positive
         """
         screen = self.sct.monitors[0]
         screen_width = screen['width']
@@ -60,7 +67,7 @@ class ScreenGrabber:
         self.roi = {"left": x, "top": y, "width": w, "height": h}
         return self
 
-    def set_fps(self, fps):
+    def set_fps(self, fps) -> 'ScreenGrabber':
         """Set frames per second for recording.
         
         Args:
@@ -68,13 +75,16 @@ class ScreenGrabber:
             
         Returns:
             ScreenGrabber: self for method chaining
+            
+        Raises:
+            ValueError: If fps is not between 1 and 60
         """
         if not 1 <= fps <= 60:
             raise ValueError("FPS must be between 1 and 60")
         self.fps = fps
         return self
 
-    def set_window(self, window_name: str):
+    def set_window(self, window_name: str) -> 'ScreenGrabber':
         """Set ROI based on window name.
         
         Args:
@@ -100,7 +110,7 @@ class ScreenGrabber:
         except Exception as e:
             raise Exception(f"Failed to set window: {str(e)}")
 
-    def record(self, duration=None, show_preview=True, save_to_file=True):
+    def record(self, duration=None, show_preview=True, save_to_file=True) -> Union[str, None]:
         """Record or preview the screen.
         
         Args:
@@ -109,7 +119,8 @@ class ScreenGrabber:
             save_to_file (bool): Whether to save recording to a file. If False, only shows preview.
             
         Returns:
-            str: Path to the recorded file if save_to_file is True, otherwise None
+            str: Path to the recorded file if save_to_file is True
+            None: If save_to_file is False
         """
         if not save_to_file:
             self._show_preview()
@@ -117,15 +128,26 @@ class ScreenGrabber:
         
         return self._record_to_file(duration, show_preview)
 
-    def _capture_frame(self):
-        """Capture a single frame from the screen."""
+    def _capture_frame(self) -> np.ndarray:
+        """Capture a single frame from the screen.
+        
+        Returns:
+            np.ndarray: Captured frame in BGR format
+        """
         screenshot = self.sct.grab(self.roi)
         # Convert from BGRA to BGR
         frame = cv2.cvtColor(np.array(screenshot), cv2.COLOR_BGRA2BGR)
         return frame
 
-    def _setup_preview_window(self, frame):
-        """Set up preview window with appropriate size and position."""
+    def _setup_preview_window(self, frame) -> str:
+        """Set up preview window with appropriate size and position.
+        
+        Args:
+            frame (np.ndarray): Frame to display in preview window
+            
+        Returns:
+            str: Window name
+        """
         window_name = 'Preview (Press q to quit)'
         cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
         
@@ -154,8 +176,12 @@ class ScreenGrabber:
         
         return window_name
 
-    def _show_preview(self):
-        """Show preview of the capture region without recording."""
+    def _show_preview(self) -> None:
+        """Show preview of the capture region without recording.
+        
+        Returns:
+            None
+        """
         first_frame = True
         window_name = None
         
@@ -173,7 +199,7 @@ class ScreenGrabber:
         finally:
             cv2.destroyAllWindows()
 
-    def _record_to_file(self, duration=None, show_preview=True):
+    def _record_to_file(self, duration=None, show_preview=True) -> str:
         """Record the screen to a file.
         
         Args:
