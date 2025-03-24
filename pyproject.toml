@@ -2,8 +2,7 @@
 version_source = "commit"
 version_variable = "setup.py:__version__"
 branch = "master"
-changelog_file = "CHANGELOG.md"
-build_command = "python -m build"
+changelog_file = "CHANGELOG.md" 
 
 [tool.semantic_release.release_groups]
 develop = ["master"]
