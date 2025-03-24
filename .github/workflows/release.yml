@@ -33,5 +33,4 @@ jobs:
           GH_TOKEN: ${{ secrets.ENV_GITHUB_TOKEN }} # GitHub에서 자동 제공하는 권한
           PYPI_TOKEN: ${{ secrets.ENV_PYPI_API_TOKEN }} # PyPI 업로드를 위한 토큰
         run: |
-          semantic-release version
-          semantic-release publish
+          semantic-release -vv publish
