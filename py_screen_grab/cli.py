@@ -1,4 +1,5 @@
 from .screen_grabber import ScreenGrabber
+from .window_utils import get_window
 
 def print_header():
     """Print program header."""
@@ -48,10 +49,11 @@ def get_capture_mode():
     print("\n[Select Capture Mode]")
     print("1. Full Screen")
     print("2. Custom Region")
+    print("3. Window Capture")
     
     while True:
-        choice = input("\nChoice (1 or 2): ")
-        if choice in ['1', '2']:
+        choice = input("\nChoice (1 or 2 or 3): ")
+        if choice in ['1', '2', '3']:
             return choice
         print("❌ Invalid choice. Please enter 1 or 2.")
 
@@ -118,6 +120,14 @@ def main():
         if capture_mode == "2":
             x, y, w, h = get_custom_roi()
             grabber.set_roi(x, y, w, h)
+        elif capture_mode == "3":
+            window_list = get_window()
+            print("\n[Available Windows]")
+            print("-" * 50)
+            for i, window in enumerate(window_list):
+                print(f"Window {i}: {window}")
+            window_name = input("\nEnter window name to capture: ")
+            grabber.set_window(window_name)
         else:
             monitor = get_monitor_info(grabber)
             grabber.set_roi(monitor["left"], monitor["top"], 

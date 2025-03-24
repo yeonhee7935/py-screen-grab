@@ -30,7 +30,7 @@ class TestCLI(unittest.TestCase):
 
     def test_get_capture_mode_invalid_input(self):
         """Test capture mode selection with invalid then valid input."""
-        with patch('builtins.input', side_effect=['3', '0', '1']):
+        with patch('builtins.input', side_effect=['4', '0', '1']):
             result = get_capture_mode()
             self.assertEqual(result, '1')
 

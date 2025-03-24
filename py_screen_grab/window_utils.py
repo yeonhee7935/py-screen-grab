@@ -1,5 +1,32 @@
 import subprocess
-from typing import Dict, Optional
+from typing import Dict, Optional, List
+
+def get_window() -> List[str]:
+    """Get window ROI information using wmctrl.
+    
+    Args:
+        window_name (str): Name of the window to find
+        
+    Returns:
+        Dict containing window information (id, x, y, width, height, name)
+        
+    Raises:
+        Exception: If window is not found
+    """
+    result = subprocess.run(["wmctrl", "-lG"], capture_output=True, text=True)
+    lines = result.stdout.strip().split("\n")
+    windows = []
+    for line in lines:
+        parts = line.split(maxsplit=6)
+        if len(parts) < 7:
+            continue
+        
+        name_parts = parts[6].split(" ", 1)
+        clean_name = name_parts[1] if len(name_parts) > 1 else name_parts[0]
+            
+        windows.append(clean_name)
+    
+    return windows
 
 def get_window_roi(window_name: str) -> Dict[str, any]:
     """Get window ROI information using wmctrl.
