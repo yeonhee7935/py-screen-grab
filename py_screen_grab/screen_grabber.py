@@ -3,8 +3,11 @@ import cv2
 import numpy as np
 import mss
 import time
+import asyncio
 from datetime import datetime
-from typing import Optional, Dict, Any, Generator, Union, Tuple, List
+from typing import Optional, Dict, Any, Union
+from rx.subject import Subject
+from rx.scheduler.eventloop import AsyncIOScheduler
 from .window_utils import get_window_roi
 
 # Window decoration constants
@@ -13,18 +16,27 @@ DECORATION_OFFSET_Y = 40  # Vertical offset for title bar
 
 class ScreenGrabber:
     def __init__(self, left=0, top=0, width=640, height=480, fps=30) -> None:
-        """Initialize screen grabber with default settings.
+        """Initialize screen grabber with reactive streaming support
         
-        Returns:
-            None
+        Args:
+            left (int): Left coordinate of capture region
+            top (int): Top coordinate of capture region
+            width (int): Width of capture region
+            height (int): Height of capture region
+            fps (int): Target frames per second
         """
         self.sct = mss.mss()
         self.fps = fps
         self.roi = {"left": left, "top": top, "width": width, "height": height}
         
-        # Create save directory if it doesn't exist
+        # Create directory for recordings
         self.save_dir = os.path.join(os.getcwd(), "recordings")
         os.makedirs(self.save_dir, exist_ok=True)
+        
+        # Initialize reactive streaming components
+        self._frame_subject = Subject()
+        self._is_capturing = False
+        self._scheduler = AsyncIOScheduler(asyncio.get_event_loop())
 
     def set_roi(self, x, y, w, h, adjust_for_decorations=True) -> 'ScreenGrabber':
         """Set region of interest for capture.
@@ -128,16 +140,58 @@ class ScreenGrabber:
         
         return self._record_to_file(duration, show_preview)
 
+    async def start_streaming(self) -> Subject:
+        """Start async frame streaming
+        
+        Returns:
+            Subject: Observable stream of frames
+        """
+        if self._is_capturing:
+            return self._frame_subject
+
+        self._is_capturing = True
+        asyncio.create_task(self._capture_loop())
+        return self._frame_subject
+
+    async def stop_streaming(self) -> None:
+        """Stop streaming and cleanup resources"""
+        self._is_capturing = False
+        self._frame_subject.on_completed()
+
     def _capture_frame(self) -> np.ndarray:
-        """Capture a single frame from the screen.
+        """Capture single frame
         
         Returns:
             np.ndarray: Captured frame in BGR format
         """
         screenshot = self.sct.grab(self.roi)
-        # Convert from BGRA to BGR
-        frame = cv2.cvtColor(np.array(screenshot), cv2.COLOR_BGRA2BGR)
-        return frame
+        return cv2.cvtColor(np.array(screenshot), cv2.COLOR_BGRA2BGR)
+
+    async def _capture_loop(self) -> None:
+        """Main async capture loop using only Subject"""
+        frame_time = 1 / self.fps
+        last_frame_time = 0
+
+        while self._is_capturing:
+            current_time = time.time()
+            
+            # Maintain consistent FPS
+            if current_time - last_frame_time < frame_time:
+                await asyncio.sleep(frame_time - (current_time - last_frame_time))
+                continue
+
+            try:
+                frame = self._capture_frame()
+                print(f"Captured frame at {time.time()} {frame.shape}")
+                
+                # Emit the frame to subscribers
+                self._frame_subject.on_next(frame)
+                last_frame_time = time.time()
+                    
+            except Exception as e:
+                print(f"Error in capture loop: {e}")
+                self._frame_subject.on_error(e)
+                break
 
     def _setup_preview_window(self, frame) -> str:
         """Set up preview window with appropriate size and position.
@@ -257,4 +311,4 @@ class ScreenGrabber:
             out.release()
             cv2.destroyAllWindows()
             print(f"\nRecording saved to: {filename}")
-            return filename 
+            return filename

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebRTC Screen Receiver</title>
+  </head>
+  <body>
+    <h2>WebRTC Screen Receiver</h2>
+    <video
+      id="video"
+      autoplay
+      playsinline
+      style="width: 640px; height: 480px; background: #ccc"
+    ></video>
+    <br />
+    <h3>Connection Status: <span id="status">Not Connected</span></h3>
+    <div>
+      <p>Python Offer (paste here):</p>
+      <textarea id="offer" rows="5" cols="50"></textarea>
+      <button id="setOffer">Set Offer</button>
+    </div>
+    <div>
+      <p>Browser Answer (copy this):</p>
+      <textarea id="answer" rows="5" cols="50" readonly></textarea>
+    </div>
+
+    <script>
+      let pc;
+      const video = document.getElementById("video");
+      const status = document.getElementById("status");
+
+      function updateStatus(message) {
+        status.textContent = message;
+        console.log("Status:", message);
+      }
+
+      // ICE gathering 완료 대기 함수
+      async function waitForIceGathering(pc) {
+        const candidates = [];
+
+        return new Promise((resolve) => {
+          pc.onicecandidate = (event) => {
+            if (event.candidate) {
+              console.log("New ICE candidate:", event.candidate);
+              candidates.push(event.candidate);
+            } else {
+              console.log("ICE gathering complete");
+              resolve(candidates);
+            }
+          };
+        });
+      }
+
+      document.getElementById("setOffer").onclick = async () => {
+        try {
+          const offerText = document.getElementById("offer").value;
+          if (!offerText) {
+            throw new Error("No offer provided");
+          }
+
+          const offerData = JSON.parse(offerText);
+          updateStatus("Creating peer connection...");
+
+          // Close existing connection if any
+          if (pc) {
+            pc.close();
+          }
+
+          // Create new peer connection with specific configuration
+          pc = new RTCPeerConnection({
+            iceServers: [
+              {
+                urls: "stun:stun.l.google.com:19302",
+              },
+            ],
+            iceCandidatePoolSize: 10,
+          });
+
+          // Add transceivers for video
+          pc.addTransceiver("video", { direction: "recvonly" });
+
+          // Set up event handlers
+          pc.ontrack = (event) => {
+            console.log("Received track:", event);
+            if (event.streams && event.streams[0]) {
+              video.srcObject = event.streams[0];
+              updateStatus("Receiving video stream");
+            }
+          };
+
+          pc.oniceconnectionstatechange = () => {
+            updateStatus(`ICE Connection State: ${pc.iceConnectionState}`);
+          };
+
+          pc.onconnectionstatechange = () => {
+            updateStatus(`Connection State: ${pc.connectionState}`);
+          };
+
+          // Set remote description (the offer)
+          updateStatus("Setting remote description...");
+          await pc.setRemoteDescription(
+            new RTCSessionDescription({
+              type: offerData.type,
+              sdp: offerData.sdp,
+            }),
+          );
+
+          // Create answer
+          updateStatus("Creating answer...");
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+
+          // Wait for ICE gathering to complete
+          updateStatus("Gathering ICE candidates...");
+          await waitForIceGathering(pc);
+
+          // Answer 데이터 생성 및 포맷팅
+          const answerData = {
+            type: pc.localDescription.type,
+            sdp: pc.localDescription.sdp,
+          };
+
+          // JSON 문자열로 변환 (들여쓰기 없이)
+          document.getElementById("answer").value = JSON.stringify(answerData);
+          updateStatus("Answer ready - copy it back to Python");
+        } catch (e) {
+          console.error("Error:", e);
+          updateStatus(`Error: ${e.message}`);
+          alert(`Error: ${e.message}`);
+        }
+      };
+    </script>
+  </body>
+</html>
