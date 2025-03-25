@@ -140,14 +140,15 @@ def main():
         # Select and execute recording mode
         mode = get_recording_mode()
         if mode == "1":
-            grabber.preview_only()
+            # Preview only
+            grabber.record(save_to_file=False)
         else:
             duration = get_duration()
             show_preview = get_show_preview()
             print("\nRecording started!")
             if not show_preview:
                 print("Press Ctrl+C to stop recording")
-            grabber.start_recording(duration, show_preview)
+            grabber.record(duration, show_preview)
             
     except KeyboardInterrupt:
         print("\n\nProgram interrupted by user.")
