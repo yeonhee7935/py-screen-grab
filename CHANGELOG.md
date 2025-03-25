@@ -1,6 +1,30 @@
 # CHANGELOG
 
 
+## v1.2.0 (2025-03-25)
+
+### Chores
+
+- Express return value
+  ([`e34e414`](https://github.com/yeonhee7935/py-screen-grab/commit/e34e414cb9aad9f6d31314d084428c7c39b1c379))
+
+### Features
+
+- Enable set_window
+  ([`88adb83`](https://github.com/yeonhee7935/py-screen-grab/commit/88adb835992e91b2417f49ebcf8f9584ba767304))
+
+### Refactoring
+
+- Install buipip dependencies before build
+  ([`89b2775`](https://github.com/yeonhee7935/py-screen-grab/commit/89b27752d61ac74a4e9132fb463711dda41083cc))
+
+- Install buipip dependencies before build
+  ([`56fc072`](https://github.com/yeonhee7935/py-screen-grab/commit/56fc072beb6287b1e58b8c9ec5af4ce48a24f063))
+
+- Update screen grabbing methods and improve method chaining
+  ([`7c4746a`](https://github.com/yeonhee7935/py-screen-grab/commit/7c4746a9bdf3d678a0d3bd6a2bed9260fe7b4f1b))
+
+
 ## v1.1.0 (2025-03-24)
 
 ### Features
