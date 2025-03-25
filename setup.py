@@ -6,7 +6,7 @@ __version__ = "1.2.0"
 setup(
     name="py-screen-grab",
     version=__version__,
-    packages=find_packages(exclude=["tests", "tests.*"]),
+    packages=find_packages(exclude=["tests", "tests.*", "examples"]),
     install_requires=[
         "mss>=6.1.0",
         "numpy>=1.19.0",
