@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 __version__ = "1.2.0"
     
 setup(
-    name="py-screen-grab",
+    name="py-screen-grab", 
     version=__version__,
     packages=find_packages(exclude=["tests", "tests.*", "examples"]),
     install_requires=[
