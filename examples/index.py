@@ -1,14 +1,17 @@
 import asyncio
 import logging
 import json
-from py_screen_grab import ScreenGrabber
-from webrtc_stream import WebRTCStream
+from py_screen_grab.screen_grabber import ScreenGrabber
+from .webrtc_stream import WebRTCStream
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 async def main():
-    grabber = ScreenGrabber().set_window("RViz")
+    print("\n=== Please enter the window name and press Enter(ex: RViz) ===\n")
+    window_name = input().strip()
+
+    grabber = ScreenGrabber().set_window(window_name=window_name)
     
     try:
         # Start streaming
