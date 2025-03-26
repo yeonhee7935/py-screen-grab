@@ -8,7 +8,7 @@ except ImportError as e:
     print(e)
     pass
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"
     
 setup(
     name="py-screen-grab", 
@@ -17,7 +17,8 @@ setup(
     install_requires=[
         "mss>=6.1.0",
         "numpy>=1.19.0",
-        "opencv-python>=4.5.0"
+        "opencv-python>=4.5.0",
+        "rx>=3.2.0"
     ],
     entry_points={
         "console_scripts": [
