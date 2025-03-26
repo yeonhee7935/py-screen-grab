@@ -1,6 +1,31 @@
 # CHANGELOG
 
 
+## v1.3.0 (2025-03-26)
+
+### Chores
+
+- Update README.md
+  ([`9b7975f`](https://github.com/yeonhee7935/py-screen-grab/commit/9b7975f598a6e8f6e537bf4b8695bf0f7bac0763))
+
+### Features
+
+- Implement Real-Time Screen Sharing with WebRTC
+  ([`d1c3200`](https://github.com/yeonhee7935/py-screen-grab/commit/d1c3200d6b3f4b48a12f10f26c94f5bcdf8c4465))
+
+Added WebRTCStream class to support real-time streaming Integrated asynchronous streaming
+  functionality into ScreenGrabber Implemented reactive frame streaming in RxJS style Managed WebRTC
+  connections and ICE candidate handling Added test code and example page
+
+### Refactoring
+
+- Commit for ci/cd
+  ([`42f4a7a`](https://github.com/yeonhee7935/py-screen-grab/commit/42f4a7a6457d8181fb4b01a250082e9f019e5228))
+
+- Extract webrtc module(py_screen_grab -> examples)
+  ([`b46f138`](https://github.com/yeonhee7935/py-screen-grab/commit/b46f138134d62739bcfe20c2f90f8d2c9a0c1692))
+
+
 ## v1.2.0 (2025-03-25)
 
 ### Chores
