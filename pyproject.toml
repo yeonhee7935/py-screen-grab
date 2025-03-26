@@ -1,6 +1,6 @@
 [tool.semantic_release]
 version_source = "commit"
-version_variable = "setup.py:__version__"
+version_variables = ["setup.py:__version__"]
 branch = "master"
 changelog_file = "CHANGELOG.md"
 build_command = "pip install build && python -m build"
