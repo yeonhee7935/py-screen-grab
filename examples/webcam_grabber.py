@@ -6,13 +6,13 @@ from rx.subject import Subject
 # and use it in the webrtc_stream.py like webrtc = WebRTCStream(frame_subject)
 
 class WebcamGrabber:
-    def __init__(self):
+    def __init__(self, device_path="/dev/video0"):
         """웹캠 캡처를 위한 클래스 초기화"""
         self._frame_subject = Subject()
         self._is_capturing = False
         self.fps = 30  # 기본 FPS 설정
         self._cap = None
-        
+        self._device_path = device_path
     async def start_streaming(self) -> Subject:
         """비동기 프레임 스트리밍 시작
         
@@ -22,7 +22,7 @@ class WebcamGrabber:
         if self._is_capturing:
             return self._frame_subject
 
-        self._cap = cv2.VideoCapture("/dev/video2")
+        self._cap = cv2.VideoCapture(self._device_path)
         if not self._cap.isOpened():
             raise RuntimeError("웹캠을 열 수 없습니다")
 
@@ -53,8 +53,6 @@ class WebcamGrabber:
             try:
                 ret, frame = self._cap.read()
                 if ret:
-                    # BGR to RGB 변환 (WebRTC 스트리밍을 위해)
-                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     self._frame_subject.on_next(frame)
                     last_frame_time = time.time()
                     
