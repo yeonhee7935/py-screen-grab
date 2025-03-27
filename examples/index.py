@@ -3,22 +3,31 @@ import logging
 import json
 from py_screen_grab.screen_grabber import ScreenGrabber
 from .webcam_grabber import WebcamGrabber
-from .webrtc_stream import WebRTCStream
+from .multi_webrtc_stream import MultiWebRTCStream
 
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 async def main():
-    # print("\n=== Please enter the window name and press Enter(ex: RViz) ===\n")
-    # window_name = input().strip()
+    print("\n=== Please enter the window name and press Enter(ex: RViz) ===\n")
 
-    # screen_grabber = ScreenGrabber().set_window(window_name=window_name)
-    webcam_grabber = WebcamGrabber(device_path="/dev/video0")
+    screen_grabber = ScreenGrabber().set_window(window_name="RViz") 
+    webcam_grabber = WebcamGrabber(device_path="/dev/video0") 
+    
     try:
-        # Start streaming
-        frame_subject = await webcam_grabber.start_streaming()
-        webrtc = WebRTCStream(frame_subject)
+        # Start streaming for both sources
+        screen_frame_subject = await screen_grabber.start_streaming()
+        webcam_frame_subject = await webcam_grabber.start_streaming()
+        
+        # Create frame subjects dictionary
+        frame_subjects = {
+            "screen": screen_frame_subject,
+            "camera": webcam_frame_subject,
+        }
+        
+        # Initialize WebRTC with multiple streams
+        webrtc = MultiWebRTCStream(frame_subjects)
         
         # Generate and wait for offer
         logger.info("Generating offer...")
@@ -58,6 +67,7 @@ async def main():
     finally:
         if 'webrtc' in locals():
             await webrtc.stop()
+        await screen_grabber.stop_streaming()
         await webcam_grabber.stop_streaming()
 
 if __name__ == "__main__":
