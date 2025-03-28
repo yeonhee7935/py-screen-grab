@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v1.3.1 (2025-03-26)
+
+### Bug Fixes
+
+- Change var name for pyproject.toml(version_variable -> version_variables)
+  ([`ba43ffe`](https://github.com/yeonhee7935/py-screen-grab/commit/ba43ffe7a87c57ec28d8565447b81ea1f5eb0d0f))
+
+- Update requirements for package and write README.md for examples
+  ([`fc0b204`](https://github.com/yeonhee7935/py-screen-grab/commit/fc0b204acc2c2b50dc4d2db8932db898237fb716))
+
+
 ## v1.3.0 (2025-03-26)
 
 ### Chores
