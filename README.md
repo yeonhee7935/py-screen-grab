@@ -15,7 +15,6 @@ A simple and efficient screen recording and streaming tool written in Python.
   - Full screen recording
   - Custom region recording
   - Window capture
-- Real-time WebRTC streaming
 - Local video recording
 - Preview mode
 - Adjustable FPS (1-60)
@@ -53,7 +52,7 @@ Follow the interactive prompts to:
 4. Choose recording mode (Preview/Record)
 5. Set recording duration (optional)
 
-### 🔧 Python API
+### Python API
 
 ```python
 from py_screen_grab import ScreenGrabber
@@ -77,7 +76,7 @@ grabber.record(duration=10, show_preview=True)
 
 ## 📋 Requirements
 
-- wmctrl
+- wmctrl (required for window management on Linux, especially 🐧**Ubuntu**)
 - Python 3.6 or higher
 - OpenCV
 - NumPy
@@ -90,4 +89,11 @@ grabber.record(duration=10, show_preview=True)
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+<br/>
+<br/>
+
+## 🤝 Contributing
+
+We welcome contributions to this project! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get started.
