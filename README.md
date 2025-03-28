@@ -41,7 +41,7 @@ pip install py-screen-grab
 Simply run:
 
 ```bash
-py-screen-grab
+screengrab
 ```
 
 Follow the interactive prompts to:
