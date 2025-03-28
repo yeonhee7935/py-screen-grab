@@ -53,46 +53,46 @@ Follow the interactive prompts to:
 
 ### Python API
 
-#### 1. Local Recording Example
+#### 1. Custom Region Capture
 
 ```python
 from py_screen_grab import ScreenGrabber
 
-# Method chaining for setup
-grabber = ScreenGrabber()\
-    .set_roi(x=100, y=100, width=800, height=600)\
+# Capture a specific region
+grabber = ScreenGrabber()
+    .set_roi(x=100, y=100, width=800, height=600)
     .set_fps(30)
 
 # Record with preview
-grabber.record(duration=10, show_preview=True)
+grabber.record()
 ```
 
-#### 2. Window Capture Example
+#### 2. Window Capture
 
 ```python
 from py_screen_grab import ScreenGrabber
 
 # Capture a specific window
-grabber = ScreenGrabber()\
-    .set_window("Window Title")\
+# The ROI is automatically set based on the window's position and size
+grabber = ScreenGrabber()
+    .set_window("Window Title")
     .set_fps(30)
 
 # Record with preview
-grabber.record(duration=10, show_preview=True)
+grabber.record()
 ```
 
-#### 3. Streaming Example
+#### 3. Streaming
 
 ```python
 from py_screen_grab import ScreenGrabber
 
-# Start streaming
-grabber = ScreenGrabber()\
-    .set_roi(x=0, y=0, width=1920, height=1080)\
+grabber = ScreenGrabber()
+    .set_roi(x=0, y=0, width=1920, height=1080)
     .set_fps(30)
 
-# Start streaming with preview
-grabber.stream(show_preview=True)
+# Start streaming
+grabber.start_streaming()
 ```
 
 <br/>
