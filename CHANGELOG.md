@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v1.3.2 (2025-03-28)
+
+### Bug Fixes
+
+- Update run command
+  ([`6368f91`](https://github.com/yeonhee7935/py-screen-grab/commit/6368f9170ae49301759693f6aa113720ba00e98f))
+
+### Chores
+
+- Update README.md
+  ([`e7d58ba`](https://github.com/yeonhee7935/py-screen-grab/commit/e7d58ba74f0f682dccb209239980f7f23819bef1))
+
+
 ## v1.3.1 (2025-03-26)
 
 ### Bug Fixes
@@ -10,6 +23,17 @@
 
 - Update requirements for package and write README.md for examples
   ([`fc0b204`](https://github.com/yeonhee7935/py-screen-grab/commit/fc0b204acc2c2b50dc4d2db8932db898237fb716))
+
+### Chores
+
+- Add CODE_OF_CONDUCT.md, CONTRIBUTING.md, update README.md
+  ([`a12bb91`](https://github.com/yeonhee7935/py-screen-grab/commit/a12bb9163945ac35933e473c79ba747458861ebb))
+
+- Add multi webrtcstream
+  ([`070e773`](https://github.com/yeonhee7935/py-screen-grab/commit/070e7733193ade96a90bb884ac1b2dc80609d2c9))
+
+- Update index.py to use WebcamGrabber for streaming
+  ([`43015f7`](https://github.com/yeonhee7935/py-screen-grab/commit/43015f7e54382a4975e99af4d0655ee050b81d4e))
 
 
 ## v1.3.0 (2025-03-26)
