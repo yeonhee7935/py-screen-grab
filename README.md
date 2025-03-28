@@ -11,16 +11,15 @@ A simple and efficient screen recording and streaming tool written in Python.
 
 ## ✨ Features
 
-- Multiple capture modes:
-  - Full screen recording
-  - Custom region recording
-  - Window capture
+- Multiple capture modes(Full Screen/Custom Region/Window)
 - Local video recording
 - Preview mode
 - Adjustable FPS (1-60)
 - Timed recording option
 - Simple command-line interface
 - Reactive streaming support
+
+- 🔴 **Note**: Window capture may not work properly with virtual monitors; use a physical monitor for best results)
 
 <br/>
 <br/>
@@ -54,6 +53,8 @@ Follow the interactive prompts to:
 
 ### Python API
 
+#### 1. Local Recording Example
+
 ```python
 from py_screen_grab import ScreenGrabber
 
@@ -62,13 +63,36 @@ grabber = ScreenGrabber()\
     .set_roi(x=100, y=100, width=800, height=600)\
     .set_fps(30)
 
-# Or capture specific window with chaining
+# Record with preview
+grabber.record(duration=10, show_preview=True)
+```
+
+#### 2. Window Capture Example
+
+```python
+from py_screen_grab import ScreenGrabber
+
+# Capture a specific window
 grabber = ScreenGrabber()\
     .set_window("Window Title")\
     .set_fps(30)
 
 # Record with preview
 grabber.record(duration=10, show_preview=True)
+```
+
+#### 3. Streaming Example
+
+```python
+from py_screen_grab import ScreenGrabber
+
+# Start streaming
+grabber = ScreenGrabber()\
+    .set_roi(x=0, y=0, width=1920, height=1080)\
+    .set_fps(30)
+
+# Start streaming with preview
+grabber.stream(show_preview=True)
 ```
 
 <br/>
