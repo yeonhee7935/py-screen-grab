@@ -1,49 +1,88 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>WebRTC Screen Receiver</title>
+    <title>WebRTC Multi Stream Receiver</title>
+    <style>
+      .video-container {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+      .video-wrapper {
+        flex: 1;
+      }
+      .video-wrapper h3 {
+        margin: 0 0 10px 0;
+      }
+      video {
+        width: 100%;
+        max-width: 640px;
+        height: 480px;
+        background: #ccc;
+      }
+      .status {
+        margin: 20px 0;
+        padding: 10px;
+        background: #f0f0f0;
+        border-radius: 4px;
+      }
+      .sdp-container {
+        margin: 20px 0;
+      }
+      textarea {
+        width: 100%;
+        margin: 10px 0;
+      }
+    </style>
   </head>
   <body>
-    <h2>WebRTC Screen Receiver</h2>
-    <video
-      id="video"
-      autoplay
-      playsinline
-      style="width: 640px; height: 480px; background: #ccc"
-    ></video>
-    <br />
-    <h3>Connection Status: <span id="status">Not Connected</span></h3>
-    <div>
-      <p>Python Offer (paste here):</p>
-      <textarea id="offer" rows="5" cols="50"></textarea>
-      <button id="setOffer">Set Offer</button>
+    <h2>WebRTC Multi Stream Receiver</h2>
+
+    <div class="video-container">
+      <div class="video-wrapper">
+        <h3>Screen Stream</h3>
+        <video id="screenVideo" autoplay playsinline></video>
+      </div>
+      <div class="video-wrapper">
+        <h3>Webcam Stream</h3>
+        <video id="webcamVideo" autoplay playsinline></video>
+      </div>
     </div>
-    <div>
-      <p>Browser Answer (copy this):</p>
-      <textarea id="answer" rows="5" cols="50" readonly></textarea>
+
+    <div class="status">
+      <h3>Connection Status: <span id="status">Not Connected</span></h3>
+    </div>
+
+    <div class="sdp-container">
+      <div>
+        <p>Python Offer (paste here):</p>
+        <textarea id="offer" rows="5"></textarea>
+        <button id="setOffer">Set Offer</button>
+      </div>
+      <div>
+        <p>Browser Answer (copy this):</p>
+        <textarea id="answer" rows="5" readonly></textarea>
+      </div>
     </div>
 
     <script>
       let pc;
-      const video = document.getElementById("video");
+      const screenVideo = document.getElementById("screenVideo");
+      const webcamVideo = document.getElementById("webcamVideo");
       const status = document.getElementById("status");
 
       function updateStatus(status) {
         status.textContent = status;
-        console.log("Status:", status);
       }
 
-      // ICE gathering 완료 대기 함수
       async function waitForIceGathering(pc) {
         const candidates = [];
 
         return new Promise((resolve) => {
           pc.onicecandidate = (event) => {
             if (event.candidate) {
-              console.log("New ICE candidate:", event.candidate);
               candidates.push(event.candidate);
             } else {
-              console.log("ICE gathering complete");
               resolve(candidates);
             }
           };
@@ -60,12 +99,10 @@
           const offerData = JSON.parse(offerText);
           updateStatus("Creating peer connection...");
 
-          // Close existing connection if any
           if (pc) {
             pc.close();
           }
 
-          // Create new peer connection with specific configuration
           pc = new RTCPeerConnection({
             iceServers: [
               {
@@ -75,15 +112,35 @@
             iceCandidatePoolSize: 10,
           });
 
-          // Add transceivers for video
+          // 각 스트림에 대한 트랜시버 추가
+          pc.addTransceiver("video", { direction: "recvonly" });
           pc.addTransceiver("video", { direction: "recvonly" });
 
-          // Set up event handlers
+          // 메타데이터와 트랙 매핑을 위한 객체
+          const streamMetadata = offerData.mediaStreamMetadata || {};
+          // 트랙 수신 처리
           pc.ontrack = (event) => {
-            console.log("Received track:", event);
-            if (event.streams && event.streams[0]) {
-              video.srcObject = event.streams[0];
-              updateStatus("Receiving video stream");
+            const track = event.track;
+            const stream = new MediaStream([event.track]); // 각 트랙마다 새로운 스트림 생성
+
+            // 메타데이터의 type을 확인하여 적절한 비디오 요소에 할당
+            if (streamMetadata[track.id]) {
+              const metadata = streamMetadata[track.id];
+              console.log(
+                metadata,
+                metadata === "screen",
+                metadata === "camera",
+                "!!!!!",
+              );
+              if (metadata === "screen") {
+                console.log("screen", stream, "!!!!!!");
+                screenVideo.srcObject = stream;
+                updateStatus("Receiving screen stream");
+              } else if (metadata === "camera") {
+                console.log("screen", stream, "!!!!!!");
+                webcamVideo.srcObject = stream;
+                updateStatus("Receiving camera stream");
+              }
             }
           };
 
@@ -95,35 +152,34 @@
             updateStatus(`Connection State: ${pc.connectionState}`);
           };
 
-          // Set remote description (the offer)
           updateStatus("Setting remote description...");
           await pc.setRemoteDescription(
             new RTCSessionDescription({
-              type: offerData.type,
-              sdp: offerData.sdp,
+              type: offerData.sessionDescription.type,
+              sdp: offerData.sessionDescription.sdp,
             }),
           );
 
-          // Create answer
           updateStatus("Creating answer...");
           const answer = await pc.createAnswer();
           await pc.setLocalDescription(answer);
 
-          // Wait for ICE gathering to complete
           updateStatus("Gathering ICE candidates...");
           await waitForIceGathering(pc);
 
-          // Answer 데이터 생성 및 포맷팅
           const answerData = {
-            type: pc.localDescription.type,
-            sdp: pc.localDescription.sdp,
+            kind: "sessionDescription",
+            sessionDescription: {
+              type: pc.localDescription.type,
+              sdp: pc.localDescription.sdp,
+            },
+            // 응답에도 메타데이터를 포함할 수 있습니다 (필요한 경우)
+            mediaStreamMetadata: streamMetadata,
           };
 
-          // JSON 문자열로 변환 (들여쓰기 없이)
           document.getElementById("answer").value = JSON.stringify(answerData);
           updateStatus("Answer ready - copy it back to Python");
         } catch (e) {
-          console.error("Error:", e);
           updateStatus(`Error: ${e.message}`);
           alert(`Error: ${e.message}`);
         }
