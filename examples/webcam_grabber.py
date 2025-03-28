@@ -10,7 +10,7 @@ class WebcamGrabber:
         """웹캠 캡처를 위한 클래스 초기화"""
         self._frame_subject = Subject()
         self._is_capturing = False
-        self.fps = 30  # 기본 FPS 설정
+        self.fps = 60  # 기본 FPS 설정
         self._cap = None
         self._device_path = device_path
     async def start_streaming(self) -> Subject:
