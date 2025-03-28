@@ -19,7 +19,7 @@ A simple and efficient screen recording and streaming tool written in Python.
 - Simple command-line interface
 - Reactive streaming support
 
-- 🔴 **Note**: Window capture may not work properly with virtual monitors; use a physical monitor for best results)
+- 🔴 **Note**: Window capture may not work properly with virtual monitors. use a physical monitor for best results
 
 <br/>
 <br/>
