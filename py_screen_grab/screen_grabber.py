@@ -15,7 +15,7 @@ DECORATION_OFFSET_X = 12  # Horizontal offset for window decorations
 DECORATION_OFFSET_Y = 40  # Vertical offset for title bar
 
 class ScreenGrabber:
-    def __init__(self, left=0, top=0, width=640, height=480, fps=30) -> None:
+    def __init__(self, left=0, top=0, width=640, height=480, fps=30, enable_logging=True) -> None:
         """Initialize screen grabber with reactive streaming support
         
         Args:
@@ -24,10 +24,12 @@ class ScreenGrabber:
             width (int): Width of capture region
             height (int): Height of capture region
             fps (int): Target frames per second
+            enable_logging (bool): Whether to enable logging (default: True)
         """
         self.sct = mss.mss()
         self.fps = fps
         self.roi = {"left": left, "top": top, "width": width, "height": height}
+        self.enable_logging = enable_logging  # Add logging control
         
         # Create directory for recordings
         self.save_dir = os.path.join(os.getcwd(), "recordings")
@@ -37,6 +39,11 @@ class ScreenGrabber:
         self._frame_subject = Subject()
         self._is_capturing = False
         self._scheduler = AsyncIOScheduler(asyncio.get_event_loop())
+
+    def _log(self, message: str) -> None:
+        """Log a message if logging is enabled."""
+        if self.enable_logging:
+            print(message)
 
     def set_roi(self, x, y, w, h, adjust_for_decorations=True) -> 'ScreenGrabber':
         """Set region of interest for capture.
@@ -117,7 +124,7 @@ class ScreenGrabber:
                 h=window_info["height"],
                 adjust_for_decorations=True
             )
-            print(f"Window '{window_info['name']}' selected for capture")
+            self._log(f"Window '{window_info['name']}' selected for capture")
             return self
         except Exception as e:
             raise Exception(f"Failed to set window: {str(e)}")
@@ -182,14 +189,14 @@ class ScreenGrabber:
 
             try:
                 frame = self._capture_frame()
-                print(f"Captured frame at {time.time()} {frame.shape}")
+                self._log(f"Captured frame at {time.time()} {frame.shape}")
                 
                 # Emit the frame to subscribers
                 self._frame_subject.on_next(frame)
                 last_frame_time = time.time()
                     
             except Exception as e:
-                print(f"Error in capture loop: {e}")
+                self._log(f"Error in capture loop: {e}")
                 self._frame_subject.on_error(e)
                 break
 
@@ -290,10 +297,6 @@ class ScreenGrabber:
                     
                     if cv2.waitKey(1) & 0xFF == ord('q'):
                         break
-                else: 
-                    if time.time() - start_time > 0.1:  
-                        if cv2.waitKey(1) & 0xFF == ord('q'):
-                            break
                 
                 out.write(frame)
                 
@@ -306,9 +309,9 @@ class ScreenGrabber:
                     time.sleep(frame_time - time_elapsed)
                     
         except KeyboardInterrupt:
-            print("\nRecording interrupted by user")
+            self._log("\nRecording interrupted by user")
         finally:
             out.release()
             cv2.destroyAllWindows()
-            print(f"\nRecording saved to: {filename}")
+            self._log(f"\nRecording saved to: {filename}")
             return filename
