@@ -2,16 +2,10 @@ import subprocess
 from typing import Dict, Optional, List
 
 def get_window() -> List[str]:
-    """Get window ROI information using wmctrl.
+    """Get a list of all window names using wmctrl.
     
-    Args:
-        window_name (str): Name of the window to find
-        
     Returns:
-        Dict containing window information (id, x, y, width, height, name)
-        
-    Raises:
-        Exception: If window is not found
+내용ㅇ        List[str]: A list of window names currently available.
     """
     result = subprocess.run(["wmctrl", "-lG"], capture_output=True, text=True)
     lines = result.stdout.strip().split("\n")
@@ -29,16 +23,22 @@ def get_window() -> List[str]:
     return windows
 
 def get_window_roi(window_name: str) -> Dict[str, any]:
-    """Get window ROI information using wmctrl.
+    """Get the region of interest (ROI) of a specific window using wmctrl.
     
     Args:
-        window_name (str): Name of the window to find
+        window_name (str): The name of the window to find.
         
     Returns:
-        Dict containing window information (id, x, y, width, height, name)
+        Dict[str, any]: A dictionary containing the window's information:
+            - id (str): The window ID.
+            - x (int): The X coordinate of the window's top-left corner.
+            - y (int): The Y coordinate of the window's top-left corner.
+            - width (int): The width of the window.
+            - height (int): The height of the window.
+            - name (str): The cleaned name of the window.
         
     Raises:
-        Exception: If window is not found
+        Exception: If the specified window is not found.
     """
     result = subprocess.run(["wmctrl", "-lG"], capture_output=True, text=True)
     lines = result.stdout.strip().split("\n")
@@ -62,4 +62,4 @@ def get_window_roi(window_name: str) -> Dict[str, any]:
                 "name": clean_name
             }
     
-    raise Exception(f"Window '{window_name}' not found") 
+    raise Exception(f"Window '{window_name}' not found")
