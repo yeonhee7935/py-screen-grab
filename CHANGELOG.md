@@ -1,6 +1,24 @@
 # CHANGELOG
 
 
+## v1.3.3 (2025-04-01)
+
+### Bug Fixes
+
+- Update docstrings for window utility functions to match implementation
+  ([`01e60d2`](https://github.com/yeonhee7935/py-screen-grab/commit/01e60d282607450b7f9f85002cf8532797b5ef1d))
+
+- Refined the docstring for `get_window` to accurately describe the return value as a list of window
+  names. - Updated the docstring for `get_window_roi` to clearly define the structure and types of
+  the returned dictionary. - Ensured consistency between the function behavior and documentation for
+  better clarity and usability.
+
+### Chores
+
+- Update README.md
+  ([`66b1a75`](https://github.com/yeonhee7935/py-screen-grab/commit/66b1a75e82c52d3a2d4ddd17eede109f3c0c5b3e))
+
+
 ## v1.3.2 (2025-03-28)
 
 ### Bug Fixes
@@ -9,6 +27,9 @@
   ([`6368f91`](https://github.com/yeonhee7935/py-screen-grab/commit/6368f9170ae49301759693f6aa113720ba00e98f))
 
 ### Chores
+
+- Update README.md
+  ([`c70354c`](https://github.com/yeonhee7935/py-screen-grab/commit/c70354cc4825d880a3324c368a91df50519ebd8b))
 
 - Update README.md
   ([`e7d58ba`](https://github.com/yeonhee7935/py-screen-grab/commit/e7d58ba74f0f682dccb209239980f7f23819bef1))
