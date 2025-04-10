@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 async def main():
     print("\n=== Please enter the window name and press Enter(ex: RViz) ===\n")
 
-    screen_grabber = ScreenGrabber().set_window(window_name="RViz").set_fps(60) 
+    screen_grabber = ScreenGrabber(show_cursor=True).set_window(window_name="RViz").set_fps(60) 
     # webcam_grabber = WebcamGrabber(device_path="/dev/video0") 
     
     try:
