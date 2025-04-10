@@ -13,17 +13,17 @@ async def main():
     print("\n=== Please enter the window name and press Enter(ex: RViz) ===\n")
 
     screen_grabber = ScreenGrabber().set_window(window_name="RViz").set_fps(60) 
-    webcam_grabber = WebcamGrabber(device_path="/dev/video0") 
+    # webcam_grabber = WebcamGrabber(device_path="/dev/video0") 
     
     try:
         # Start streaming for both sources
         screen_frame_subject = await screen_grabber.start_streaming()
-        webcam_frame_subject = await webcam_grabber.start_streaming()
+        # webcam_frame_subject = await webcam_grabber.start_streaming()
         
         # Create frame subjects dictionary
         frame_subjects = {
             "screen": screen_frame_subject,
-            "camera": webcam_frame_subject,
+            # "camera": webcam_frame_subject,
         }
         
         # Initialize WebRTC with multiple streams

@@ -4,6 +4,7 @@ import numpy as np
 import mss
 import time
 import asyncio
+import pyautogui
 from datetime import datetime
 from typing import Optional, Dict, Any, Union
 from rx.subject import Subject
@@ -172,7 +173,18 @@ class ScreenGrabber:
             np.ndarray: Captured frame in BGR format
         """
         screenshot = self.sct.grab(self.roi)
-        return cv2.cvtColor(np.array(screenshot), cv2.COLOR_BGRA2BGR)
+        frame = cv2.cvtColor(np.array(screenshot), cv2.COLOR_BGRA2BGR)
+        try:
+            cursor_x, cursor_y = pyautogui.position() 
+            if (self.roi["left"] <= cursor_x < self.roi["left"] + self.roi["width"] and
+                self.roi["top"] <= cursor_y < self.roi["top"] + self.roi["height"]):
+                relative_x = cursor_x - self.roi["left"]
+                relative_y = cursor_y - self.roi["top"]
+                cv2.circle(frame, (relative_x, relative_y), 4, (255, 0, 0), -1)  # Green circle
+               
+        except Exception as e:
+            self._log(f"Error capturing cursor: {e}")
+        return frame
 
     async def _capture_loop(self) -> None:
         """Main async capture loop using only Subject"""
