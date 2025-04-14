@@ -1,6 +1,22 @@
 # CHANGELOG
 
 
+## v1.4.0 (2025-04-14)
+
+### Chores
+
+- Add TODO
+  ([`14e49f2`](https://github.com/yeonhee7935/py-screen-grab/commit/14e49f2f8581656e602e08d258c2ffeee7468aae))
+
+### Features
+
+- Add init param show_cursor in ScreenGrabber
+  ([`f91c681`](https://github.com/yeonhee7935/py-screen-grab/commit/f91c6811da2334bd011b88e033202ee291ecfccf))
+
+- Capture cursor
+  ([`04965c1`](https://github.com/yeonhee7935/py-screen-grab/commit/04965c1204800bfdec9c0bfc8b8f01fd0013b352))
+
+
 ## v1.3.3 (2025-04-01)
 
 ### Bug Fixes
