@@ -14,6 +14,8 @@ from .window_utils import get_window_roi
 DECORATION_OFFSET_X = 12  # Horizontal offset for window decorations
 DECORATION_OFFSET_Y = 40  # Vertical offset for title bar
 
+# TODO: 특정 화면을 선택할 수 있는 기능 추가(ex: 듀얼모니터, 싱글모니터1,2)
+# TODO: 커서 색상 선택할 수 있는 기능 추가
 class ScreenGrabber:
     def __init__(self, left=0, top=0, width=640, height=480, fps=30, enable_logging=True, show_cursor=False) -> None:
         """Initialize screen grabber with reactive streaming support
@@ -177,7 +179,7 @@ class ScreenGrabber:
                 self.roi["top"] <= cursor_y < self.roi["top"] + self.roi["height"]):
                 relative_x = cursor_x - self.roi["left"]
                 relative_y = cursor_y - self.roi["top"]
-                cv2.circle(frame, (relative_x, relative_y), 4, (255, 0, 0), -1)  # Red circle
+                cv2.circle(frame, (relative_x, relative_y), 8, (0, 255, 0), -1)  # Red circle
         except Exception as e:
             self._log(f"Error capturing cursor: {e}")
 
