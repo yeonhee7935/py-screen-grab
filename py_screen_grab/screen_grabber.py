@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import mss
 import time
-import asyncio
+import asyncio   
 from datetime import datetime
 from typing import Optional, Dict, Any, Union
 from rx.subject import Subject
@@ -14,8 +14,10 @@ from .window_utils import get_window_roi
 DECORATION_OFFSET_X = 12  # Horizontal offset for window decorations
 DECORATION_OFFSET_Y = 40  # Vertical offset for title bar
 
+# TODO: 특정 화면을 선택할 수 있는 기능 추가(ex: 듀얼모니터, 싱글모니터1,2)
+# TODO: 커서 색상 선택할 수 있는 기능 추가
 class ScreenGrabber:
-    def __init__(self, left=0, top=0, width=640, height=480, fps=30, enable_logging=True) -> None:
+    def __init__(self, left=0, top=0, width=640, height=480, fps=30, enable_logging=True, show_cursor=False) -> None:
         """Initialize screen grabber with reactive streaming support
         
         Args:
@@ -25,11 +27,13 @@ class ScreenGrabber:
             height (int): Height of capture region
             fps (int): Target frames per second
             enable_logging (bool): Whether to enable logging (default: True)
+            show_cursor (bool): Whether to show cursor (default: False)
         """
         self.sct = mss.mss()
         self.fps = fps
         self.roi = {"left": left, "top": top, "width": width, "height": height}
         self.enable_logging = enable_logging  # Add logging control
+        self.show_cursor = show_cursor
         
         # Create directory for recordings
         self.save_dir = os.path.join(os.getcwd(), "recordings")
@@ -165,6 +169,20 @@ class ScreenGrabber:
         self._is_capturing = False
         self._frame_subject.on_completed()
 
+    def _draw_cursor_on_frame(self, frame: np.ndarray) -> None:
+        """Draw cursor on the frame if show_cursor is True."""
+        import pyautogui
+        
+        try:
+            cursor_x, cursor_y = pyautogui.position()
+            if (self.roi["left"] <= cursor_x < self.roi["left"] + self.roi["width"] and
+                self.roi["top"] <= cursor_y < self.roi["top"] + self.roi["height"]):
+                relative_x = cursor_x - self.roi["left"]
+                relative_y = cursor_y - self.roi["top"]
+                cv2.circle(frame, (relative_x, relative_y), 8, (0, 255, 0), -1)  # Red circle
+        except Exception as e:
+            self._log(f"Error capturing cursor: {e}")
+
     def _capture_frame(self) -> np.ndarray:
         """Capture single frame
         
@@ -172,7 +190,10 @@ class ScreenGrabber:
             np.ndarray: Captured frame in BGR format
         """
         screenshot = self.sct.grab(self.roi)
-        return cv2.cvtColor(np.array(screenshot), cv2.COLOR_BGRA2BGR)
+        frame = cv2.cvtColor(np.array(screenshot), cv2.COLOR_BGRA2BGR)
+        if self.show_cursor:
+            self._draw_cursor_on_frame(frame)
+        return frame
 
     async def _capture_loop(self) -> None:
         """Main async capture loop using only Subject"""
