@@ -1,6 +1,28 @@
 # CHANGELOG
 
 
+## v1.5.0 (2025-04-17)
+
+### Chores
+
+- Add ROI Type
+  ([`538e12e`](https://github.com/yeonhee7935/py-screen-grab/commit/538e12e1be96c4bea686de9e6f197e3f6edb963c))
+
+### Features
+
+- Adds monitor-based ROI configuration to ScreenGrabber
+  ([`5330db0`](https://github.com/yeonhee7935/py-screen-grab/commit/5330db0d4df848b7755df6e455989ac8445328df))
+
+Introduces a `set_monitor` method to configure the region of interest (ROI) based on a specific
+  monitor. Updates usage in the example code to replace manual ROI setup with monitor-based
+  configuration for improved usability and clarity.
+
+### Refactoring
+
+- Rename get_window to get_window_list and update return type; add get_monitor_list function
+  ([`c3ba67a`](https://github.com/yeonhee7935/py-screen-grab/commit/c3ba67a6ca6bf1584816b07a7f6568caed8ec722))
+
+
 ## v1.4.0 (2025-04-14)
 
 ### Chores
