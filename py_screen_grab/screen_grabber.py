@@ -9,10 +9,17 @@ from typing import Optional, Dict, Any, Union
 from rx.subject import Subject
 from rx.scheduler.eventloop import AsyncIOScheduler
 from .window_utils import get_window_roi
-
+from typing_extensions import TypedDict
 # Window decoration constants
 DECORATION_OFFSET_X = 12  # Horizontal offset for window decorations
 DECORATION_OFFSET_Y = 40  # Vertical offset for title bar
+
+class ROI(TypedDict):
+    left: int
+    top: int
+    width: int
+    height: int
+
 
 # TODO: 특정 화면을 선택할 수 있는 기능 추가(ex: 듀얼모니터, 싱글모니터1,2)
 # TODO: 커서 색상 선택할 수 있는 기능 추가
@@ -31,7 +38,7 @@ class ScreenGrabber:
         """
         self.sct = mss.mss()
         self.fps = fps
-        self.roi = {"left": left, "top": top, "width": width, "height": height}
+        self.roi: ROI = {"left": left, "top": top, "width": width, "height": height}
         self.enable_logging = enable_logging  # Add logging control
         self.show_cursor = show_cursor
         
