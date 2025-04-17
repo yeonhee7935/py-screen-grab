@@ -140,6 +140,27 @@ class ScreenGrabber:
         except Exception as e:
             raise Exception(f"Failed to set window: {str(e)}")
 
+    def set_monitor(self, monitor_number: int) -> 'ScreenGrabber':
+        """Set ROI based on monitor number.
+        
+        Args:
+            monitor_number (int): Monitor number to capture
+        Returns:
+            ScreenGrabber: self for method chaining
+        Raises:
+            ValueError: If monitor number is invalid
+        """ 
+        
+        monitor = self.sct.monitors[monitor_number]
+        self.set_roi(
+            x=monitor["left"],
+            y=monitor["top"],
+            w=monitor["width"],
+            h=monitor["height"],
+            adjust_for_decorations=False
+        )
+        return self
+    
     def record(self, duration=None, show_preview=True, save_to_file=True) -> Union[str, None]:
         """Record or preview the screen.
         
