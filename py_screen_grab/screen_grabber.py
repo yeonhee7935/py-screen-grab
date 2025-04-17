@@ -9,10 +9,17 @@ from typing import Optional, Dict, Any, Union
 from rx.subject import Subject
 from rx.scheduler.eventloop import AsyncIOScheduler
 from .window_utils import get_window_roi
-
+from typing_extensions import TypedDict
 # Window decoration constants
 DECORATION_OFFSET_X = 12  # Horizontal offset for window decorations
 DECORATION_OFFSET_Y = 40  # Vertical offset for title bar
+
+class ROI(TypedDict):
+    left: int
+    top: int
+    width: int
+    height: int
+
 
 # TODO: 특정 화면을 선택할 수 있는 기능 추가(ex: 듀얼모니터, 싱글모니터1,2)
 # TODO: 커서 색상 선택할 수 있는 기능 추가
@@ -31,7 +38,7 @@ class ScreenGrabber:
         """
         self.sct = mss.mss()
         self.fps = fps
-        self.roi = {"left": left, "top": top, "width": width, "height": height}
+        self.roi: ROI = {"left": left, "top": top, "width": width, "height": height}
         self.enable_logging = enable_logging  # Add logging control
         self.show_cursor = show_cursor
         
@@ -133,6 +140,27 @@ class ScreenGrabber:
         except Exception as e:
             raise Exception(f"Failed to set window: {str(e)}")
 
+    def set_monitor(self, monitor_number: int) -> 'ScreenGrabber':
+        """Set ROI based on monitor number.
+        
+        Args:
+            monitor_number (int): Monitor number to capture
+        Returns:
+            ScreenGrabber: self for method chaining
+        Raises:
+            ValueError: If monitor number is invalid
+        """ 
+        
+        monitor = self.sct.monitors[monitor_number]
+        self.set_roi(
+            x=monitor["left"],
+            y=monitor["top"],
+            w=monitor["width"],
+            h=monitor["height"],
+            adjust_for_decorations=False
+        )
+        return self
+    
     def record(self, duration=None, show_preview=True, save_to_file=True) -> Union[str, None]:
         """Record or preview the screen.
         
