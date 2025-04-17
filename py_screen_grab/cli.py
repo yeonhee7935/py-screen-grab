@@ -1,5 +1,5 @@
 from .screen_grabber import ScreenGrabber
-from .window_utils import get_window
+from .window_utils import get_window_list
 
 def print_header():
     """Print program header."""
@@ -121,7 +121,7 @@ def main():
             x, y, w, h = get_custom_roi()
             grabber.set_roi(x, y, w, h)
         elif capture_mode == "3":
-            window_list = get_window()
+            window_list = get_window_list()
             print("\n[Available Windows]")
             print("-" * 50)
             for i, window in enumerate(window_list):

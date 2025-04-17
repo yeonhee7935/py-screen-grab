@@ -1,15 +1,16 @@
 import subprocess
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Union
+import mss
 
-def get_window() -> List[str]:
+def get_window_list() -> List[str]:
     """Get a list of all window names using wmctrl.
     
     Returns:
-내용ㅇ        List[str]: A list of window names currently available.
+        List[str]: A list of window names currently available.
     """
     result = subprocess.run(["wmctrl", "-lG"], capture_output=True, text=True)
     lines = result.stdout.strip().split("\n")
-    windows = []
+    windows: List[str] = []
     for line in lines:
         parts = line.split(maxsplit=6)
         if len(parts) < 7:
@@ -22,14 +23,14 @@ def get_window() -> List[str]:
     
     return windows
 
-def get_window_roi(window_name: str) -> Dict[str, any]:
+def get_window_roi(window_name: str) -> Dict[str, Union[str, int]]:
     """Get the region of interest (ROI) of a specific window using wmctrl.
     
     Args:
         window_name (str): The name of the window to find.
         
     Returns:
-        Dict[str, any]: A dictionary containing the window's information:
+        Dict[str, Union[str, int]]: A dictionary containing the window's information:
             - id (str): The window ID.
             - x (int): The X coordinate of the window's top-left corner.
             - y (int): The Y coordinate of the window's top-left corner.
@@ -63,3 +64,13 @@ def get_window_roi(window_name: str) -> Dict[str, any]:
             }
     
     raise Exception(f"Window '{window_name}' not found")
+
+def get_monitor_list() -> List[Dict[str, int]]:
+    """
+    Retrieve the list of monitors available for screen capture.
+
+    Returns:
+        List[Dict[str, int]]: A list of dictionaries containing monitor details.
+    """
+    with mss.mss() as sct:
+        return sct.monitors
