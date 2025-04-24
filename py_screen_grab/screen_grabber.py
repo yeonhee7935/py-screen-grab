@@ -218,7 +218,14 @@ class ScreenGrabber:
             np.ndarray: Captured frame in BGR format
         """
         screenshot = self.sct.grab(self.roi)
-        frame = cv2.cvtColor(np.array(screenshot), cv2.COLOR_BGRA2BGR)
+        
+        frame = np.array(screenshot)
+        if cv2.ocl.haveOpenCL():
+            cv2.ocl.setUseOpenCL(True)
+            gpu_frame = cv2.UMat(frame)
+            frame = cv2.cvtColor(gpu_frame, cv2.COLOR_BGRA2BGR).get()
+        else:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
         if self.show_cursor:
             self._draw_cursor_on_frame(frame)
         return frame
