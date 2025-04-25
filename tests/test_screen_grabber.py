@@ -1,178 +1,55 @@
+# py_screen_grabber/test/test_screen_grabber.py
+
 import unittest
-import os
-import numpy as np
-from py_screen_grab.screen_grabber import ScreenGrabber, DECORATION_OFFSET_X, DECORATION_OFFSET_Y
+import asyncio
+import gi 
 
-class TestScreenGrabber(unittest.TestCase):
-    def setUp(self):
-        """Set up test fixtures before each test method."""
-        self.grabber = ScreenGrabber()
-        self.test_roi = (0, 0, 640, 480)
-        self.test_fps = 30
+gi.require_version("Gst", "1.0")
+gi.require_version('GstApp', '1.0')
+from gi.repository import Gst
+from py_screen_grab.screen_grabber import ScreenGrabber
 
-    def tearDown(self):
-        """Clean up after each test method."""
-        self.grabber = None
+class TestScreenGrabber(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
+        self.grabber = ScreenGrabber().set_monitor(0).set_fps(10)
+        self.subject = await self.grabber.start_streaming()
+        self.frame_count = 0
+        self.done = asyncio.Event()
+        self.loop = asyncio.get_running_loop()
 
-    def test_init(self):
-        """Test ScreenGrabber initialization."""
-        self.assertIsNotNone(self.grabber.sct)
-        self.assertTrue(os.path.exists(self.grabber.save_dir))
-        self.assertEqual(self.grabber.fps, 30)  # default fps
+    async def asyncTearDown(self):
+        await self.grabber.stop_streaming()
 
-    def test_set_fps(self):
-        """Test setting FPS."""
-        result = self.grabber.set_fps(self.test_fps)
-        self.assertEqual(self.grabber.fps, self.test_fps)
-        self.assertEqual(result, self.grabber)  # Test method chaining
+    def _on_next(self, buffer: Gst.Buffer) -> None:
+        self.frame_count += 1
+        print(f"[Test] Frame #{self.frame_count}")
+        if self.frame_count >= 5:
+            self.loop.call_soon_threadsafe(
+                lambda: asyncio.create_task(self.grabber.stop_streaming())
+            )
+            self.loop.call_soon_threadsafe(self.done.set)
 
-    def test_invalid_fps(self):
-        """Test setting invalid FPS values."""
-        with self.assertRaises(ValueError):
-            self.grabber.set_fps(0)
-        with self.assertRaises(ValueError):
-            self.grabber.set_fps(-1)
-        with self.assertRaises(ValueError):
-            self.grabber.set_fps(61)
+    def _on_error(self, e: Exception) -> None:
+        print(f"[Test] Error: {e}")
+        self.done.set()
 
-    def test_capture_frame(self):
-        """Test screen capture functionality."""
-        x, y, w, h = self.test_roi
-        self.grabber.set_roi(x, y, w, h, adjust_for_decorations=False)
-        frame = self.grabber._capture_frame()  # Access internal method
-        
-        # Check frame properties
-        self.assertIsInstance(frame, np.ndarray)
-        self.assertEqual(frame.shape[0], h)  # height
-        self.assertEqual(frame.shape[1], w)  # width
-        self.assertEqual(frame.shape[2], 3)  # RGB channels
+    def _on_completed(self) -> None:
+        print("[Test] Completed.")
+        self.done.set()
 
-    def test_invalid_roi(self):
-        """Test setting invalid ROI values."""
-        with self.assertRaises(ValueError):
-            self.grabber.set_roi(0, 0, -1, 480, adjust_for_decorations=False)
-        with self.assertRaises(ValueError):
-            self.grabber.set_roi(0, 0, 640, -1, adjust_for_decorations=False)
-
-    def test_basic_roi_adjustments(self):
-        """Test basic ROI adjustments without decoration compensation."""
-        screen = self.grabber.sct.monitors[0]
-        screen_width = screen['width']
-        screen_height = screen['height']
-
-        test_cases = [
-            {
-                "name": "negative coordinates",
-                "input": (-100, -100, 640, 480),
-                "expected": {"left": 0, "top": 0, "width": 640, "height": 480}
-            },
-            {
-                "name": "exceeding width",
-                "input": (100, 100, screen_width + 100, 480),
-                "expected": {"left": 100, "top": 100, "width": screen_width - 100, "height": 480}
-            },
-            {
-                "name": "exceeding height",
-                "input": (100, 100, 640, screen_height + 100),
-                "expected": {"left": 100, "top": 100, "width": 640, "height": screen_height - 100}
-            },
-            {
-                "name": "valid coordinates",
-                "input": (100, 100, 300, 200),
-                "expected": {"left": 100, "top": 100, "width": 300, "height": 200}
-            }
-        ]
-
-        for case in test_cases:
-            with self.subTest(case=case["name"]):
-                x, y, w, h = case["input"]
-                result = self.grabber.set_roi(x, y, w, h, adjust_for_decorations=False)
-                self.assertEqual(self.grabber.roi, case["expected"])
-                self.assertEqual(result, self.grabber)  # Test method chaining
-
-    def test_roi_with_decoration_adjustment(self):
-        """Test ROI adjustments with window decoration compensation."""
-        original_x, original_y = 100, 100
-        original_w, original_h = 300, 200
-        
-        result = self.grabber.set_roi(
-            original_x, 
-            original_y, 
-            original_w, 
-            original_h, 
-            adjust_for_decorations=True
-        )
-        
-        expected_roi = {
-            "left": original_x - DECORATION_OFFSET_X,
-            "top": original_y - DECORATION_OFFSET_Y * 2,
-            "width": original_w + (DECORATION_OFFSET_X),
-            "height": original_h + DECORATION_OFFSET_Y
-        }
-        
-        self.assertEqual(self.grabber.roi, expected_roi)
-        self.assertEqual(result, self.grabber)  # Test method chaining
-
-    def test_roi_without_decoration_adjustment(self):
-        """Test ROI adjustments without window decoration compensation."""
-        original_x, original_y = 100, 100
-        original_w, original_h = 300, 200
-        
-        result = self.grabber.set_roi(
-            original_x, 
-            original_y, 
-            original_w, 
-            original_h, 
-            adjust_for_decorations=False
-        )
-        
-        expected_roi = {
-            "left": original_x,
-            "top": original_y,
-            "width": original_w,
-            "height": original_h
-        }
-        
-        self.assertEqual(self.grabber.roi, expected_roi)
-        self.assertEqual(result, self.grabber)  # Test method chaining
-
-    def test_decoration_adjustment_with_screen_bounds(self):
-        """Test window decoration compensation with screen boundary checks."""
-        screen = self.grabber.sct.monitors[0]
-        screen_width = screen['width']
-        screen_height = screen['height']
-
-        # Test case near screen edges
-        self.grabber.set_roi(
-            10,  # Very close to left edge
-            10,  # Very close to top edge
-            300,
-            200,
-            adjust_for_decorations=True
+    async def test_stream_emits_frames(self):
+        self.subject.subscribe(
+            on_next=self._on_next,
+            on_error=self._on_error,
+            on_completed=self._on_completed,
         )
 
-        # Should not go below 0 for x and y
-        self.assertGreaterEqual(self.grabber.roi["left"], 0)
-        self.assertGreaterEqual(self.grabber.roi["top"], 0)
+        try:
+            await asyncio.wait_for(self.done.wait(), timeout=10)
+        except asyncio.TimeoutError:
+            self.fail("Timed out waiting for frames.")
 
-        # Test case near screen edges (right and bottom)
-        self.grabber.set_roi(
-            screen_width - 100,  # Close to right edge
-            screen_height - 100,  # Close to bottom edge
-            300,
-            200,
-            adjust_for_decorations=True
-        )
+        self.assertGreaterEqual(self.frame_count, 1, "No frames were emitted")
 
-        # Should not exceed screen dimensions
-        self.assertLessEqual(
-            self.grabber.roi["left"] + self.grabber.roi["width"],
-            screen_width
-        )
-        self.assertLessEqual(
-            self.grabber.roi["top"] + self.grabber.roi["height"],
-            screen_height
-        )
-
-if __name__ == '__main__':
-    unittest.main() 
+if __name__ == "__main__":
+    unittest.main()
