@@ -15,8 +15,8 @@ DECORATION_OFFSET_X = 12
 DECORATION_OFFSET_Y = 40
 
 class ROI(TypedDict):
-    x: int
-    y: int
+    left: int
+    top: int
     width: int
     height: int
 
@@ -25,7 +25,7 @@ class ScreenGrabber:
                  fps: int = 30, enable_logging: bool = True, show_cursor: bool = False) -> None:
         Gst.init(None)  
         self.fps = fps
-        self.roi:ROI = {"x": left, "y": top, "width": width, "height": height}
+        self.roi:ROI = {"left": left, "top": top, "width": width, "height": height}
         self.enable_logging = enable_logging
         self.show_cursor = show_cursor
         self._frame_subject: Subject = Subject()
