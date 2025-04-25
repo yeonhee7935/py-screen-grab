@@ -4,3 +4,4 @@ opencv-python>=4.5.0
 rx==3.2.0
 aiortc==1.10.1
 python-semantic-release==9.21.0
+PyGObject==3.50.0
